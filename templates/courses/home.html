@@ -1,0 +1,773 @@
+{% extends 'base.html' %}
+
+{% block title %}خانه - آکادمی یاسری{% endblock %}
+
+{% block content %}
+<!-- Hero Section with Medical Education Image -->
+<section class="hero-section" style="
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 80px 0;
+    position: relative;
+    overflow: hidden;
+">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6 hero-content" data-aos="fade-right">
+                <h1 class="hero-title">آموزش پزشکی در سطح حرفه‌ای</h1>
+                <p class="hero-subtitle">با بهترین دوره‌های آموزشی پزشکی، مهارت‌هایتان را ارتقا دهید و در مسیر شغلی خود موفق شوید. ما متعهد به ارائه آموزش‌های با کیفیت و کاربردی هستیم.</p>
+                <div class="d-flex flex-wrap gap-3">
+                    <a href="{% url 'courses:course_list' %}" class="btn btn-warning btn-lg" style="
+                        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+                        border: none;
+                        color: white;
+                        font-weight: 600;
+                        padding: 15px 30px;
+                        border-radius: 50px;
+                        box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+                        transition: all 0.3s ease;
+                    " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(245, 158, 11, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(245, 158, 11, 0.3)'">
+                        <i class="fas fa-play me-2"></i>
+                        شروع یادگیری
+                    </a>
+                    <a href="#courses" class="btn btn-outline-light btn-lg" style="
+                        border: 2px solid rgba(255, 255, 255, 0.8);
+                        color: white;
+                        font-weight: 600;
+                        padding: 13px 30px;
+                        border-radius: 50px;
+                        background: rgba(255, 255, 255, 0.1);
+                        backdrop-filter: blur(10px);
+                        transition: all 0.3s ease;
+                    " onmouseover="this.style.background='rgba(255, 255, 255, 0.2)'; this.style.borderColor='white'; this.style.transform='translateY(-2px)'" onmouseout="this.style.background='rgba(255, 255, 255, 0.1)'; this.style.borderColor='rgba(255, 255, 255, 0.8)'; this.style.transform='translateY(0)'">
+                        <i class="fas fa-eye me-2"></i>
+                        مشاهده دوره‌ها
+                    </a>
+                </div>
+                <div class="mt-4 d-flex align-items-center gap-4">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-users text-warning me-2"></i>
+                        <span>+۱۰,۰۰۰ دانشجو</span>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-star text-warning me-2"></i>
+                        <span>۴.۹ امتیاز</span>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-certificate text-warning me-2"></i>
+                        <span>گواهی معتبر</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6" data-aos="fade-left">
+                <div class="position-relative">
+                    <!-- Medical Education Hero Image -->
+                    {% load static %}
+                    <div class="hero-image-container" style="
+                        height: 600px;
+                        border-radius: 20px;
+                        position: relative;
+                        overflow: hidden;
+                        box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+                    ">
+                        <img src="{% static 'images/e9e04d9c-a770-4bd3-a1e0-8196184ae5b2.jpeg' %}" 
+                             alt="استاد دانیال یاسری فر" 
+                             style="
+                                width: 100%;
+                                height: 100%;
+                                object-fit: cover;
+                                object-position: center 20%;
+                                border-radius: 20px;
+                             ">
+                        
+                        <!-- Overlay with content -->
+                        <div class="position-absolute" style="
+                            top: 0;
+                            left: 0;
+                            right: 0;
+                            bottom: 0;
+                            background: linear-gradient(135deg, rgba(102, 126, 234, 0.3) 0%, rgba(118, 75, 162, 0.3) 100%);
+                            display: flex;
+                            align-items: flex-end;
+                            justify-content: center;
+                            border-radius: 20px;
+                            padding-bottom: 2rem;
+                        ">
+                            <div class="text-center text-white">
+                                <h3 class="mb-3" style="font-size: 2.5rem; font-weight: 800; text-shadow: 2px 2px 4px rgba(0,0,0,0.7);">استاد دانیال یاسری فر</h3>
+                                <p class="mb-0" style="font-size: 1.2rem; text-shadow: 1px 1px 2px rgba(0,0,0,0.7);">با بهترین اساتید و متدهای روز دنیا</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Centered Course Showcase -->
+<section class="py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 col-md-10">
+                <div class="text-center mb-5" data-aos="fade-up">
+                    <h2 class="section-title" style="color: #8b5cf6; font-size: 2.5rem; font-weight: 800;">جدیدترین دوره‌ها</h2>
+                    <p class="section-subtitle" style="color: #6b7280; font-size: 1.1rem;">آخرین دوره‌های اضافه شده را ببینید</p>
+                </div>
+                
+                <!-- Featured Course Card - Centered -->
+                <div class="row justify-content-center mb-5">
+                    <div class="col-lg-6 col-md-8">
+                        <div class="card shadow-lg border-0" style="border-radius: 20px; overflow: hidden;" data-aos="zoom-in">
+                            <div class="card-body text-center p-4">
+                                <h3 class="card-title mb-3" style="color: #1f2937; font-size: 1.8rem; font-weight: 700;">دوره جامع طب فیزیک</h3>
+                                <p class="card-text mb-4" style="color: #6b7280;">این دوره توسط استاد یاسری فر تدریس میشود</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="price-display" style="color: #1f2937; font-size: 1.2rem; font-weight: 700;">۷,۵۰۰,۰۰۰ تومان</span>
+                                    <button class="btn btn-primary" style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); border: none; border-radius: 50px; padding: 10px 20px; font-weight: 600; color: white; box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3); transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(139, 92, 246, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(139, 92, 246, 0.3)'">
+                                        <i class="fas fa-eye me-2"></i>
+                                        مشاهده
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Course Topics List -->
+                <div class="row justify-content-center">
+                    <div class="col-lg-8">
+                        <div class="card" style="background: #1f2937; border-radius: 15px; border: none;" data-aos="fade-up" data-aos-delay="200">
+                            <div class="card-body p-4">
+                                <h5 class="text-white mb-3 text-center">سرفصل‌های دوره</h5>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <ul class="list-unstyled text-white">
+                                            <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>بررسی پوستچر بدن و علل تغییر آن</li>
+                                            <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>تشخیص پوستچر نامطلوب بدن بر عضلات استخوان‌ها</li>
+                                            <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>تشخیص بالینی و تست‌های بالینی</li>
+                                            <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>درمان مشکلات ساختاری و وضعیتی ستون فقرات</li>
+                                            <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>آموزش ماساژ تخصصی و آزادسازی عضلات</li>
+                                        </ul>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <ul class="list-unstyled text-white">
+                                            <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>آرتروز زانو، استئوفیت زانو و تشخیص در رادیولوژی</li>
+                                            <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>آموزش ضماد مخصوص آرتروز و استئوفیت</li>
+                                            <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>تشخیص سندرم تونل کارپال و کیوبیتال</li>
+                                            <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>تکنیک‌های تخصصی کایروپرکتیک</li>
+                                            <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>تشخیص اسکلیوز، کایفوز و لوردوز</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Courses -->
+<section id="courses" class="py-5 bg-light">
+    <div class="container">
+        <div class="text-center mb-5" data-aos="fade-up">
+            <h2 class="section-title">دوره‌های ویژه</h2>
+            <p class="section-subtitle">برجسته‌ترین دوره‌های آموزشی را کشف کنید</p>
+        </div>
+        
+        <!-- Main Featured Course - Center -->
+        <div class="row justify-content-center mb-5">
+            <div class="col-lg-6 col-md-8">
+                {% for course in featured_courses %}
+                <div class="card shadow-lg border-0" style="border-radius: 20px; overflow: hidden;" data-aos="zoom-in">
+                    <div class="position-relative">
+                        {% if course.thumbnail %}
+                            <img src="{{ course.thumbnail.url }}" class="card-img-top" alt="{{ course.title }}" style="height: 250px; object-fit: cover;">
+                        {% else %}
+                            <img src="https://images.unsplash.com/photo-1576091160399?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" 
+                                 class="card-img-top" alt="{{ course.title }}" style="height: 250px; object-fit: cover;">
+                        {% endif %}
+                        <div class="position-absolute top-0 start-0 m-3">
+                            <span class="badge bg-success">{{ course.get_difficulty_display }}</span>
+                        </div>
+                        {% if course.discount_price %}
+                        <div class="position-absolute top-0 end-0 m-3">
+                            <span class="badge bg-danger">تخفیف ویژه</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="card-body text-center p-4">
+                        <h3 class="card-title mb-3" style="color: #1f2937; font-size: 1.8rem; font-weight: 700;">{{ course.title }}</h3>
+                        <p class="card-text mb-4" style="color: #6b7280;">{{ course.short_description|truncatechars:120 }}</p>
+                        
+                        <div class="d-flex justify-content-center align-items-center mb-3">
+                            <div class="rating me-3">
+                                {% for i in "12345" %}
+                                    <i class="fas fa-star text-warning"></i>
+                                {% endfor %}
+                                <small class="text-muted ms-1">(۴.۸)</small>
+                            </div>
+                            <small class="text-muted">
+                                <i class="fas fa-clock me-1"></i>
+                                {{ course.duration_hours }} ساعت
+                            </small>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <div>
+                                {% if course.is_free %}
+                                    <span class="price-display text-success" style="font-size: 1.2rem; font-weight: 700;">رایگان</span>
+                                {% else %}
+                                    {% if course.discount_price %}
+                                        <span class="text-muted text-decoration-line-through me-2">{{ course.price|floatformat:0 }} تومان</span><br>
+                                        <span class="price-display text-success" style="font-size: 1.2rem; font-weight: 700;">{{ course.discount_price|floatformat:0 }} تومان</span>
+                                    {% else %}
+                                        <span class="price-display" style="color: #1f2937; font-size: 1.2rem; font-weight: 700;">{{ course.price|floatformat:0 }} تومان</span>
+                                    {% endif %}
+                                {% endif %}
+                            </div>
+                            <div class="text-end">
+                                <small class="text-muted d-block">{{ course.get_total_sections }} بخش</small>
+                                <small class="text-muted">{{ course.get_total_videos }} ویدیو</small>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <a href="{{ course.get_absolute_url }}" class="btn btn-primary" style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); border: none; border-radius: 50px; padding: 12px 24px; font-weight: 600; color: white; box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3); transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(139, 92, 246, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(139, 92, 246, 0.3)'">
+                                <i class="fas fa-eye me-2"></i>
+                                مشاهده دوره
+                            </a>
+                            {% if not course.is_free %}
+                                <button onclick="addToCart('course', {{ course.id }}, this)" class="btn btn-outline-primary">
+                                    <i class="fas fa-cart-plus me-1"></i>
+                                    افزودن به سبد خرید
+                                </button>
+                            {% else %}
+                                <a href="{{ course.get_absolute_url }}" class="btn btn-success">
+                                    <i class="fas fa-play me-1"></i>
+                                    شروع دوره رایگان
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <!-- Three Level Courses - Filling the empty spaces -->
+        <div class="row mb-5">
+            <!-- مقدماتی Course - Left -->
+            <div class="col-lg-4 col-md-6 mb-4" data-aos="fade-right" data-aos-delay="100">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius: 15px; overflow: hidden; background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);">
+                    <div class="position-relative">
+                        <img src="{% static 'images/e9e04d9c-a770-4bd3-a1e0-8196184ae5b2.jpeg' %}" class="card-img-top" alt="مقدماتی" style="height: 180px; object-fit: cover;">
+                        <div class="position-absolute top-0 start-0 m-2">
+                            <span class="badge bg-success">مبتدی</span>
+                        </div>
+                        <div class="position-absolute top-0 end-0 m-2">
+                            <span class="badge bg-primary">جدید</span>
+                        </div>
+                    </div>
+                    
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title text-primary fw-bold mb-2">مقدماتی</h5>
+                        <p class="card-text text-muted small mb-3">آموزش اصول اولیه طب فیزیکی و مفاهیم پایه برای شروع یادگیری</p>
+                        
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div>
+                                <span class="text-primary fw-bold">۱,۵۰۰,۰۰۰ تومان</span>
+                            </div>
+                            <div class="text-end">
+                                <small class="text-muted d-block">۵ بخش</small>
+                                <small class="text-muted">۲۰ ساعت</small>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-auto">
+                            <a href="{% url 'courses:course_detail' 'moghaddamati' %}" class="btn btn-outline-primary w-100">
+                                <i class="fas fa-play me-1"></i>
+                                شروع یادگیری
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- متوسط Course - Center -->
+            <div class="col-lg-4 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="200">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius: 15px; overflow: hidden; background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);">
+                    <div class="position-relative">
+                        <img src="{% static 'images/e9e04d9c-a770-4bd3-a1e0-8196184ae5b2.jpeg' %}" class="card-img-top" alt="متوسط" style="height: 180px; object-fit: cover;">
+                        <div class="position-absolute top-0 start-0 m-2">
+                            <span class="badge bg-warning text-dark">متوسط</span>
+                        </div>
+                        <div class="position-absolute top-0 end-0 m-2">
+                            <span class="badge bg-primary">محبوب</span>
+                        </div>
+                    </div>
+                    
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title text-warning fw-bold mb-2">متوسط</h5>
+                        <p class="card-text text-muted small mb-3">آموزش مفاهیم متوسط طب فیزیکی و تکنیک‌های درمانی پیشرفته</p>
+                        
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div>
+                                <span class="text-warning fw-bold">۲,۵۰۰,۰۰۰ تومان</span>
+                            </div>
+                            <div class="text-end">
+                                <small class="text-muted d-block">۶ بخش</small>
+                                <small class="text-muted">۳۰ ساعت</small>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-auto">
+                            <a href="{% url 'courses:course_detail' 'motavaset' %}" class="btn btn-warning w-100">
+                                <i class="fas fa-play me-1"></i>
+                                شروع یادگیری
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- پیشرفته Course - Right -->
+            <div class="col-lg-4 col-md-6 mb-4" data-aos="fade-left" data-aos-delay="300">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius: 15px; overflow: hidden; background: linear-gradient(135deg, #fce7f3 0%, #fbcfe8 100%);">
+                    <div class="position-relative">
+                        <img src="{% static 'images/e9e04d9c-a770-4bd3-a1e0-8196184ae5b2.jpeg' %}" class="card-img-top" alt="پیشرفته" style="height: 180px; object-fit: cover;">
+                        <div class="position-absolute top-0 start-0 m-2">
+                            <span class="badge bg-danger">پیشرفته</span>
+                        </div>
+                        <div class="position-absolute top-0 end-0 m-2">
+                            <span class="badge bg-success">تخصصی</span>
+                        </div>
+                    </div>
+                    
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title text-danger fw-bold mb-2">پیشرفته</h5>
+                        <p class="card-text text-muted small mb-3">آموزش تخصصی و پیشرفته طب فیزیکی برای متخصصان</p>
+                        
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div>
+                                <span class="text-danger fw-bold">۳,۵۰۰,۰۰۰ تومان</span>
+                            </div>
+                            <div class="text-end">
+                                <small class="text-muted d-block">۸ بخش</small>
+                                <small class="text-muted">۴۰ ساعت</small>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-auto">
+                            <a href="{% url 'courses:course_detail' 'pishrafte' %}" class="btn btn-danger w-100">
+                                <i class="fas fa-play me-1"></i>
+                                شروع یادگیری
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center mt-5" data-aos="fade-up">
+            <a href="{% url 'courses:course_list' %}" class="btn btn-primary btn-lg">
+                <i class="fas fa-arrow-left me-2"></i>
+                مشاهده همه دوره‌ها
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Learning Path Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="text-center mb-5" data-aos="fade-up">
+            <h2 class="section-title">مسیر یادگیری پیشنهادی</h2>
+            <p class="section-subtitle">مراحل یادگیری طب فیزیکی را به ترتیب طی کنید</p>
+        </div>
+        
+        <div class="row">
+            <!-- Step 1: مقدماتی -->
+            <div class="col-lg-4 col-md-6 mb-4" data-aos="fade-right" data-aos-delay="100">
+                <div class="card border-0 shadow-sm h-100" style="border-radius: 15px; background: linear-gradient(135deg, #e0f2fe 0%, #b3e5fc 100%);">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3">
+                            <div class="bg-primary rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                                <span class="text-white fw-bold fs-4">۱</span>
+                            </div>
+                        </div>
+                        <h5 class="card-title text-primary fw-bold mb-3">مرحله اول: مقدماتی</h5>
+                        <p class="card-text text-muted mb-4">آموزش اصول اولیه و مفاهیم پایه طب فیزیکی</p>
+                        <ul class="list-unstyled text-start mb-4">
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>آناتومی پایه</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>فیزیولوژی حرکت</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>ارزیابی اولیه بیمار</li>
+                        </ul>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="text-primary fw-bold">۱,۵۰۰,۰۰۰ تومان</span>
+                            <small class="text-muted">۲۰ ساعت</small>
+                        </div>
+                        <a href="{% url 'courses:course_detail' 'moghaddamati' %}" class="btn btn-primary w-100">
+                            <i class="fas fa-play me-1"></i>
+                            شروع مرحله اول
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Step 2: متوسط -->
+            <div class="col-lg-4 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="200">
+                <div class="card border-0 shadow-sm h-100" style="border-radius: 15px; background: linear-gradient(135deg, #fff3e0 0%, #ffcc80 100%);">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3">
+                            <div class="bg-warning rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                                <span class="text-dark fw-bold fs-4">۲</span>
+                            </div>
+                        </div>
+                        <h5 class="card-title text-warning fw-bold mb-3">مرحله دوم: متوسط</h5>
+                        <p class="card-text text-muted mb-4">آموزش تکنیک‌های پیشرفته و درمانی</p>
+                        <ul class="list-unstyled text-start mb-4">
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>تکنیک‌های درمانی پیشرفته</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>درمان اختلالات ستون فقرات</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>برنامه‌ریزی درمانی</li>
+                        </ul>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="text-warning fw-bold">۲,۵۰۰,۰۰۰ تومان</span>
+                            <small class="text-muted">۳۰ ساعت</small>
+                        </div>
+                        <a href="{% url 'courses:course_detail' 'motavaset' %}" class="btn btn-warning w-100">
+                            <i class="fas fa-play me-1"></i>
+                            شروع مرحله دوم
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Step 3: پیشرفته -->
+            <div class="col-lg-4 col-md-6 mb-4" data-aos="fade-left" data-aos-delay="300">
+                <div class="card border-0 shadow-sm h-100" style="border-radius: 15px; background: linear-gradient(135deg, #fce4ec 0%, #f8bbd9 100%);">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3">
+                            <div class="bg-danger rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                                <span class="text-white fw-bold fs-4">۳</span>
+                            </div>
+                        </div>
+                        <h5 class="card-title text-danger fw-bold mb-3">مرحله سوم: پیشرفته</h5>
+                        <p class="card-text text-muted mb-4">آموزش تخصصی و پیشرفته برای متخصصان</p>
+                        <ul class="list-unstyled text-start mb-4">
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>تکنیک‌های تخصصی پیشرفته</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>مدیریت موارد پیچیده</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>تحقیق و پژوهش</li>
+                        </ul>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="text-danger fw-bold">۳,۵۰۰,۰۰۰ تومان</span>
+                            <small class="text-muted">۴۰ ساعت</small>
+                        </div>
+                        <a href="{% url 'courses:course_detail' 'pishrafte' %}" class="btn btn-danger w-100">
+                            <i class="fas fa-play me-1"></i>
+                            شروع مرحله سوم
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Categories -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="text-center mb-5" data-aos="fade-up">
+            <h2 class="section-title">دسته‌بندی‌ها</h2>
+            <p class="section-subtitle">از میان دسته‌بندی‌های مختلف انتخاب کنید</p>
+        </div>
+        
+        <div class="row justify-content-center">
+            {% for category in categories %}
+            <div class="col-lg-3 col-md-6 mb-4" data-aos="zoom-in" data-aos-delay="{{ forloop.counter0|add:100 }}">
+                <div class="card text-center h-100 border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <div class="mb-3">
+                            <div class="bg-primary bg-gradient rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                                <i class="fas fa-stethoscope fa-2x text-white"></i>
+                            </div>
+                        </div>
+                        <h5 class="card-title fw-bold">{{ category.name }}</h5>
+                        <p class="card-text text-muted">{{ category.description|truncatechars:80 }}</p>
+                        <a href="{% url 'courses:category_detail' category.slug %}" class="btn btn-outline-primary">
+                            <i class="fas fa-arrow-left me-1"></i>
+                            مشاهده دوره‌ها
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12 text-center" data-aos="fade-up">
+                <div class="py-5">
+                    <i class="fas fa-folder-open fa-4x text-muted mb-3"></i>
+                    <h4 class="text-muted">هیچ دسته‌بندی موجود نیست</h4>
+                    <p class="text-muted">به زودی دسته‌بندی‌های جدید اضافه خواهد شد</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Special Offer Section -->
+<section class="py-5" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6" data-aos="fade-right">
+                <div class="text-white">
+                    <h2 class="fw-bold mb-4" style="font-size: 2.5rem;">پکیج کامل طب فیزیکی</h2>
+                    <p class="lead mb-4">تمام سه سطح یادگیری را با تخفیف ویژه خریداری کنید</p>
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="bg-warning rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
+                            <i class="fas fa-percentage text-dark fs-4"></i>
+                        </div>
+                        <div>
+                            <h4 class="mb-0">۳۰٪ تخفیف</h4>
+                            <small>برای خرید پکیج کامل</small>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="bg-success rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
+                            <i class="fas fa-clock text-white fs-4"></i>
+                        </div>
+                        <div>
+                            <h4 class="mb-0">۹۰ ساعت</h4>
+                            <small>محتوای آموزشی جامع</small>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="bg-info rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
+                            <i class="fas fa-certificate text-white fs-4"></i>
+                        </div>
+                        <div>
+                            <h4 class="mb-0">گواهی معتبر</h4>
+                            <small>پس از اتمام هر مرحله</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6" data-aos="fade-left">
+                <div class="card border-0 shadow-lg" style="border-radius: 20px; overflow: hidden;">
+                    <div class="card-body p-4">
+                        <div class="text-center mb-4">
+                            <h3 class="text-primary fw-bold mb-3">دوره جامع طب فیزیک</h3>
+                            <div class="d-flex justify-content-center align-items-center mb-3">
+                                <span class="text-muted text-decoration-line-through me-3 fs-5">۷,۵۰۰,۰۰۰ تومان</span>
+                                <span class="text-success fw-bold fs-3">۵,۲۵۰,۰۰۰ تومان</span>
+                            </div>
+                            <span class="badge bg-danger fs-6 px-3 py-2">تخفیف ۳۰٪</span>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <h6 class="fw-bold mb-3">شامل تمام دوره‌ها:</h6>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span>مقدماتی (۲۰ ساعت)</span>
+                                <span class="text-success">✓</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span>متوسط (۳۰ ساعت)</span>
+                                <span class="text-success">✓</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span>پیشرفته (۴۰ ساعت)</span>
+                                <span class="text-success">✓</span>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-primary btn-lg" style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); border: none; border-radius: 50px; font-weight: 600;">
+                                <i class="fas fa-shopping-cart me-2"></i>
+                                خرید پکیج کامل
+                            </button>
+                            <a href="{% url 'courses:course_detail' 'doreh-jame-tab-fiziki' %}" class="btn btn-outline-primary">
+                                <i class="fas fa-eye me-1"></i>
+                                مشاهده جزئیات
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Latest Courses -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="text-center mb-5" data-aos="fade-up">
+            <h2 class="section-title">جدیدترین دوره‌ها</h2>
+            <p class="section-subtitle">آخرین دوره‌های اضافه شده را ببینید</p>
+        </div>
+        
+        <div class="row justify-content-center">
+            {% for course in latest_courses %}
+            <div class="col-lg-3 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="{{ forloop.counter0|add:100 }}">
+                <div class="course-card h-100">
+                    <div class="position-relative">
+                        {% if course.thumbnail %}
+                            <img src="{{ course.thumbnail.url }}" class="card-img-top" alt="{{ course.title }}" style="height: 150px; object-fit: cover;">
+                        {% else %}
+                            <img src="https://images.unsplash.com/photo-{{ 1576091160399|add:forloop.counter0|add:100 }}?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80" 
+                                 class="card-img-top" alt="{{ course.title }}" style="height: 150px; object-fit: cover;">
+                        {% endif %}
+                        <div class="position-absolute top-0 start-0 m-2">
+                            <span class="badge bg-success">جدید</span>
+                        </div>
+                    </div>
+                    
+                    <div class="card-body">
+                        <h6 class="course-title">{{ course.title }}</h6>
+                        <div class="d-flex justify-content-between align-items-center">
+                            {% if course.is_free %}
+                                <span class="text-success fw-bold">رایگان</span>
+                            {% else %}
+                                <span class="text-primary fw-bold">{{ course.get_effective_price|floatformat:0 }} تومان</span>
+                            {% endif %}
+                            <a href="{{ course.get_absolute_url }}" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-eye me-1"></i>
+                                مشاهده
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12 text-center" data-aos="fade-up">
+                <div class="py-5">
+                    <i class="fas fa-clock fa-4x text-muted mb-3"></i>
+                    <h4 class="text-muted">هیچ دوره جدیدی موجود نیست</h4>
+                    <p class="text-muted">به زودی دوره‌های جدید اضافه خواهد شد</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Statistics Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row text-center">
+            <div class="col-lg-3 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="100">
+                <div class="p-4">
+                    <div class="bg-primary bg-gradient rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                        <i class="fas fa-users fa-2x text-white"></i>
+                    </div>
+                    <h3 class="fw-bold text-primary counter">۱۰,۰۰۰+</h3>
+                    <p class="text-muted">دانشجوی فعال</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="200">
+                <div class="p-4">
+                    <div class="bg-success bg-gradient rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                        <i class="fas fa-graduation-cap fa-2x text-white"></i>
+                    </div>
+                    <h3 class="fw-bold text-success counter">۵۰۰+</h3>
+                    <p class="text-muted">دوره آموزشی</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="300">
+                <div class="p-4">
+                    <div class="bg-warning bg-gradient rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                        <i class="fas fa-chalkboard-teacher fa-2x text-white"></i>
+                    </div>
+                    <h3 class="fw-bold text-warning counter">۱۰۰+</h3>
+                    <p class="text-muted">استاد متخصص</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="400">
+                <div class="p-4">
+                    <div class="bg-info bg-gradient rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                        <i class="fas fa-star fa-2x text-white"></i>
+                    </div>
+                    <h3 class="fw-bold text-info counter">۴.۹</h3>
+                    <p class="text-muted">امتیاز رضایت</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Testimonials Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="text-center mb-5" data-aos="fade-up">
+            <h2 class="section-title">نظرات دانشجویان</h2>
+            <p class="section-subtitle">تجربه‌های واقعی از دانشجویان ما</p>
+        </div>
+        
+        <div class="row">
+            <div class="col-lg-4 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="100">
+                <div class="testimonial-card">
+                    <div class="quote">
+                        "دوره‌های آکادمی یاسری واقعاً عالی هستند. محتوا بسیار کاربردی و استادان بسیار متخصص هستند. به همه توصیه می‌کنم."
+                    </div>
+                    <div class="author">
+                        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80" alt="احمد محمدی">
+                        <div>
+                            <h6 class="mb-0">احمد محمدی</h6>
+                            <small class="text-muted">دانشجوی پزشکی</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="200">
+                <div class="testimonial-card">
+                    <div class="quote">
+                        "کیفیت آموزش‌ها فوق‌العاده است. توانستم در مدت کوتاهی مهارت‌هایم را به طور قابل توجهی بهبود دهم."
+                    </div>
+                    <div class="author">
+                        <img src="https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80" alt="فاطمه احمدی">
+                        <div>
+                            <h6 class="mb-0">فاطمه احمدی</h6>
+                            <small class="text-muted">پرستار</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="300">
+                <div class="testimonial-card">
+                    <div class="quote">
+                        "پشتیبانی عالی و محتوای با کیفیت. این آکادمی بهترین انتخاب برای یادگیری پزشکی است."
+                    </div>
+                    <div class="author">
+                        <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80" alt="علی رضایی">
+                        <div>
+                            <h6 class="mb-0">علی رضایی</h6>
+                            <small class="text-muted">دندانپزشک</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-5" style="background: var(--gradient-primary);">
+    <div class="container text-center text-white">
+        <div data-aos="fade-up">
+            <h2 class="fw-bold mb-4">آماده شروع یادگیری هستید؟</h2>
+            <p class="lead mb-4">به جمع هزاران نفر از دانشجویان و متخصصان پزشکی بپیوندید</p>
+            <div class="d-flex flex-wrap justify-content-center gap-3">
+                <a href="{% url 'accounts:signup' %}" class="btn btn-light btn-lg">
+                    <i class="fas fa-user-plus me-2"></i>
+                    همین حالا شروع کنید
+                </a>
+                <a href="{% url 'courses:course_list' %}" class="btn btn-outline-light btn-lg">
+                    <i class="fas fa-search me-2"></i>
+                    جستجو در دوره‌ها
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

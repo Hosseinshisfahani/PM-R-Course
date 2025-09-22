@@ -1,0 +1,382 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}ویرایش پروفایل - آکادمی یاسری{% endblock %}
+
+{% block extra_css %}
+<style>
+    .profile-edit-container {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 2rem 0;
+    }
+    
+    .profile-edit-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 3rem;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    
+    .profile-edit-header {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+    
+    .profile-edit-title {
+        font-size: 2rem;
+        font-weight: 800;
+        color: var(--text-dark);
+        margin-bottom: 0.5rem;
+    }
+    
+    .profile-edit-subtitle {
+        color: var(--text-light);
+        font-size: 1.1rem;
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-label {
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 0.5rem;
+    }
+    
+    .form-control {
+        border: 2px solid #e5e7eb;
+        border-radius: 10px;
+        padding: 12px 16px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.2rem rgba(99, 102, 241, 0.25);
+    }
+    
+    .btn-save {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        border: none;
+        color: white;
+        padding: 15px 40px;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        width: 100%;
+    }
+    
+    .btn-save:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+        color: white;
+    }
+    
+    .btn-cancel {
+        background: transparent;
+        border: 2px solid #e5e7eb;
+        color: var(--text-dark);
+        padding: 13px 40px;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+        width: 100%;
+        margin-top: 1rem;
+    }
+    
+    .btn-cancel:hover {
+        background: #f3f4f6;
+        border-color: #d1d5db;
+        color: var(--text-dark);
+    }
+    
+    .profile-image-preview {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 4px solid white;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        margin: 0 auto 1rem;
+        display: block;
+    }
+    
+    .image-upload-area {
+        text-align: center;
+        padding: 2rem;
+        border: 2px dashed #d1d5db;
+        border-radius: 15px;
+        background: #f9fafb;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    
+    .image-upload-area:hover {
+        border-color: var(--primary-color);
+        background: rgba(99, 102, 241, 0.05);
+    }
+    
+    .image-upload-icon {
+        font-size: 3rem;
+        color: #9ca3af;
+        margin-bottom: 1rem;
+    }
+    
+    .image-upload-text {
+        color: var(--text-light);
+        font-weight: 600;
+    }
+    
+    .form-section {
+        background: rgba(99, 102, 241, 0.05);
+        border-radius: 15px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+    
+    .section-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .section-icon {
+        color: var(--primary-color);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="profile-edit-container">
+    <div class="container">
+        <div class="profile-edit-card">
+            <div class="profile-edit-header">
+                <h1 class="profile-edit-title">ویرایش پروفایل</h1>
+                <p class="profile-edit-subtitle">اطلاعات شخصی خود را به‌روزرسانی کنید</p>
+            </div>
+            
+            <form method="post" enctype="multipart/form-data" novalidate>
+                {% csrf_token %}
+                
+                <!-- Profile Image Section -->
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-camera section-icon"></i>
+                        تصویر پروفایل
+                    </h3>
+                    
+                    <div class="row">
+                        <div class="col-md-4 text-center">
+                            {% if form.instance.profile_image %}
+                                <img src="{{ form.instance.profile_image.url }}" alt="تصویر فعلی" class="profile-image-preview" id="current-image">
+                            {% else %}
+                                <div class="profile-image-preview bg-primary d-flex align-items-center justify-content-center text-white" id="current-image" style="font-size: 3rem;">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-8">
+                            <div class="image-upload-area" onclick="document.getElementById('id_profile_image').click()">
+                                <i class="fas fa-cloud-upload-alt image-upload-icon"></i>
+                                <p class="image-upload-text">برای تغییر تصویر کلیک کنید</p>
+                                <small class="text-muted">فرمت‌های مجاز: JPG, PNG, GIF (حداکثر 5MB)</small>
+                            </div>
+                            {{ form.profile_image }}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Personal Information Section -->
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-user section-icon"></i>
+                        اطلاعات شخصی
+                    </h3>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="{{ form.first_name.id_for_label }}" class="form-label">نام</label>
+                                {{ form.first_name }}
+                                {% if form.first_name.errors %}
+                                    <div class="text-danger mt-1">
+                                        {% for error in form.first_name.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="{{ form.last_name.id_for_label }}" class="form-label">نام خانوادگی</label>
+                                {{ form.last_name }}
+                                {% if form.last_name.errors %}
+                                    <div class="text-danger mt-1">
+                                        {% for error in form.last_name.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="{{ form.email.id_for_label }}" class="form-label">ایمیل</label>
+                                {{ form.email }}
+                                {% if form.email.errors %}
+                                    <div class="text-danger mt-1">
+                                        {% for error in form.email.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="{{ form.phone_number.id_for_label }}" class="form-label">شماره تلفن</label>
+                                {{ form.phone_number }}
+                                {% if form.phone_number.errors %}
+                                    <div class="text-danger mt-1">
+                                        {% for error in form.phone_number.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="{{ form.birth_date.id_for_label }}" class="form-label">تاریخ تولد</label>
+                        {{ form.birth_date }}
+                        {% if form.birth_date.errors %}
+                            <div class="text-danger mt-1">
+                                {% for error in form.birth_date.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Account Information Section -->
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-cog section-icon"></i>
+                        اطلاعات حساب کاربری
+                    </h3>
+                    
+                    <div class="form-group">
+                        <label for="{{ form.username.id_for_label }}" class="form-label">نام کاربری</label>
+                        {{ form.username }}
+                        {% if form.username.errors %}
+                            <div class="text-danger mt-1">
+                                {% for error in form.username.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Form Actions -->
+                <div class="text-center">
+                    <button type="submit" class="btn btn-save">
+                        <i class="fas fa-save me-2"></i>
+                        ذخیره تغییرات
+                    </button>
+                    <a href="{% url 'accounts:profile' %}" class="btn btn-cancel">
+                        <i class="fas fa-times me-2"></i>
+                        انصراف
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Image preview functionality
+        const imageInput = document.getElementById('id_profile_image');
+        const currentImage = document.getElementById('current-image');
+        
+        if (imageInput) {
+            imageInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        if (currentImage.tagName === 'IMG') {
+                            currentImage.src = e.target.result;
+                        } else {
+                            // Replace the div with an img element
+                            const newImg = document.createElement('img');
+                            newImg.src = e.target.result;
+                            newImg.alt = 'تصویر جدید';
+                            newImg.className = 'profile-image-preview';
+                            newImg.id = 'current-image';
+                            currentImage.parentNode.replaceChild(newImg, currentImage);
+                        }
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+        
+        // Form validation
+        const form = document.querySelector('form');
+        form.addEventListener('submit', function(e) {
+            const requiredFields = form.querySelectorAll('[required]');
+            let isValid = true;
+            
+            requiredFields.forEach(field => {
+                if (!field.value.trim()) {
+                    field.classList.add('is-invalid');
+                    isValid = false;
+                } else {
+                    field.classList.remove('is-invalid');
+                }
+            });
+            
+            if (!isValid) {
+                e.preventDefault();
+                alert('لطفاً تمام فیلدهای الزامی را پر کنید.');
+            }
+        });
+        
+        // Real-time validation
+        const inputs = form.querySelectorAll('input, select, textarea');
+        inputs.forEach(input => {
+            input.addEventListener('blur', function() {
+                if (this.hasAttribute('required') && !this.value.trim()) {
+                    this.classList.add('is-invalid');
+                } else {
+                    this.classList.remove('is-invalid');
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}
