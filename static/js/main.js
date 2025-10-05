@@ -1,4 +1,4 @@
-// Main JavaScript for Yasery Academy
+// Main JavaScript for mrbone
 document.addEventListener('DOMContentLoaded', function() {
     
     // Counter Animation
@@ -267,5 +267,5 @@ document.addEventListener('DOMContentLoaded', function() {
     window.hideLoadingOverlay = hideLoadingOverlay;
     window.setButtonLoading = setButtonLoading;
 
-    console.log('Yasery Academy JavaScript loaded successfully!');
+    console.log('mrbone JavaScript loaded successfully!');
 });

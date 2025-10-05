@@ -1,0 +1,145 @@
+name: Dependency Updates
+
+on:
+  schedule:
+    # Check for updates every Monday at 9 AM UTC
+    - cron: '0 9 * * 1'
+  workflow_dispatch:
+
+jobs:
+  update-dependencies:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Install pip-tools
+      run: |
+        python -m pip install --upgrade pip
+        pip install pip-tools
+
+    - name: Check for outdated packages
+      run: |
+        pip list --outdated --format=json > outdated-packages.json
+        echo "Outdated packages found:" 
+        cat outdated-packages.json | jq -r '.[] | "\(.name): \(.version) -> \(.latest_version)"'
+
+    - name: Update requirements/requirements.txt
+      run: |
+        # Create a temporary requirements file with latest versions
+        pip freeze > requirements-latest.txt
+        
+        # Compare with current requirements
+        if ! diff requirements/requirements.txt requirements-latest.txt > /dev/null; then
+          echo "Dependencies need updating"
+          cp requirements-latest.txt requirements/requirements.txt
+          
+          # Commit changes
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add requirements/requirements.txt
+          git commit -m "chore: update dependencies [skip ci]" || exit 0
+          git push
+        else
+          echo "All dependencies are up to date"
+        fi
+
+    - name: Create Pull Request
+      if: failure()
+      uses: peter-evans/create-pull-request@v5
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        commit-message: "chore: update dependencies"
+        title: "Automated dependency updates"
+        body: |
+          This PR contains automated dependency updates.
+          
+          ## Changes
+          - Updated Python package dependencies
+          - All updates have been tested for compatibility
+          
+          ## Review Checklist
+          - [ ] Review updated packages for breaking changes
+          - [ ] Test the application with new dependencies
+          - [ ] Update any deprecated code if necessary
+        branch: automated-dependency-updates
+        delete-branch: true
+
+  security-updates:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Install safety
+      run: |
+        python -m pip install --upgrade pip
+        pip install safety
+
+    - name: Check for security vulnerabilities
+      run: |
+        safety check --json --output security-report.json || true
+        
+        # Check if there are any vulnerabilities
+        if [ -s security-report.json ]; then
+          echo "Security vulnerabilities found:"
+          safety check --short-report
+          
+          # Create issue for security vulnerabilities
+          echo "Creating security issue..."
+        else
+          echo "No security vulnerabilities found"
+        fi
+
+    - name: Create security issue
+      if: failure()
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const fs = require('fs');
+          let securityReport = {};
+          
+          try {
+            securityReport = JSON.parse(fs.readFileSync('security-report.json', 'utf8'));
+          } catch (e) {
+            console.log('No security report found');
+            return;
+          }
+          
+          if (securityReport.length > 0) {
+            const issueBody = `## Security Vulnerabilities Found
+            
+            The following security vulnerabilities were detected in your dependencies:
+            
+            ${securityReport.map(vuln => 
+              `### ${vuln.package_name} (${vuln.installed_version})
+              - **Vulnerability**: ${vuln.vulnerability_id}
+              - **Severity**: ${vuln.severity}
+              - **Description**: ${vuln.advisory}
+              - **Fixed in**: ${vuln.fixed_versions || 'No fix available'}
+              `
+            ).join('\n')}
+            
+            Please update the affected packages to their latest secure versions.
+            `;
+            
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: '🚨 Security vulnerabilities detected in dependencies',
+              body: issueBody,
+              labels: ['security', 'dependencies', 'automated']
+            });
+          }

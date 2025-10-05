@@ -35,6 +35,19 @@
 Python 3.9+
 pip
 virtualenv (اختیاری)
+Docker (اختیاری - برای deployment)
+```
+
+### استفاده از Docker (توصیه شده)
+```bash
+# اجرای پروژه با Docker
+docker-compose up -d
+
+# اجرای migrations
+docker-compose exec web python manage.py migrate
+
+# ایجاد superuser
+docker-compose exec web python manage.py createsuperuser
 ```
 
 ### مراحل نصب
@@ -53,7 +66,7 @@ source venv/bin/activate  # در macOS/Linux
 
 3. **نصب dependencies**
 ```bash
-pip install -r requirements.txt
+pip install -r requirements/requirements.txt
 ```
 
 4. **اجرای migrations**
@@ -81,6 +94,18 @@ medical_course/
 ├── templates/         # قالب‌های HTML
 ├── static/            # فایل‌های استاتیک
 ├── media/             # فایل‌های آپلود شده
+├── deployment/        # فایل‌های Docker و deployment
+│   ├── Dockerfile
+│   ├── docker-compose.yml
+│   ├── nginx.conf
+│   └── .dockerignore
+├── docs/              # مستندات پروژه
+│   ├── CI_CD_SETUP.md
+│   └── GOOGLE_OAUTH_SETUP.md
+├── requirements/      # فایل‌های dependencies
+│   ├── requirements.txt
+│   └── requirements-dev.txt
+├── .github/           # GitHub Actions workflows
 └── medical_course/    # تنظیمات اصلی
 ```
 
@@ -139,6 +164,11 @@ DEBUG=True
 SECRET_KEY=your-secret-key
 STRIPE_PUBLISHABLE_KEY=pk_test_...
 STRIPE_SECRET_KEY=sk_test_...
+POSTGRES_DB=medical_course
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=postgres
+POSTGRES_HOST=127.0.0.1
+POSTGRES_PORT=5432
 ```
 
 ## استفاده
@@ -162,7 +192,7 @@ STRIPE_SECRET_KEY=sk_test_...
 
 - **Backend**: Django 4.2
 - **Frontend**: Bootstrap 5, JavaScript
-- **Database**: SQLite (قابل تغییر به PostgreSQL)
+- **Database**: PostgreSQL (قابل پیکربندی با متغیرهای محیطی)
 - **Payment**: Stripe
 - **Rich Text**: CKEditor
 - **Forms**: Django Crispy Forms

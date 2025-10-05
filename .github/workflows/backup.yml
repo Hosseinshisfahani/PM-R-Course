@@ -1,0 +1,71 @@
+name: Database Backup
+
+on:
+  schedule:
+    # Run backup daily at 3 AM UTC
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    environment: production
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install boto3
+
+    - name: Create database backup
+      env:
+        DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        S3_BUCKET: ${{ secrets.S3_BACKUP_BUCKET }}
+      run: |
+        # Create backup filename with timestamp
+        BACKUP_FILE="medical_course_backup_$(date +%Y%m%d_%H%M%S).sql"
+        
+        # Create database backup
+        pg_dump $DATABASE_URL > $BACKUP_FILE
+        
+        # Compress backup
+        gzip $BACKUP_FILE
+        
+        # Upload to S3
+        aws s3 cp ${BACKUP_FILE}.gz s3://$S3_BUCKET/database-backups/
+        
+        # Clean up local file
+        rm ${BACKUP_FILE}.gz
+        
+        echo "Backup completed: ${BACKUP_FILE}.gz"
+
+    - name: Cleanup old backups
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        S3_BUCKET: ${{ secrets.S3_BACKUP_BUCKET }}
+      run: |
+        # Keep only last 30 days of backups
+        aws s3 ls s3://$S3_BUCKET/database-backups/ --recursive | \
+        awk '$1 < "'$(date -d '30 days ago' '+%Y-%m-%d')'" {print $4}' | \
+        xargs -I {} aws s3 rm s3://$S3_BUCKET/{}
+
+    - name: Notify backup status
+      if: always()
+      run: |
+        if [ "${{ job.status }}" == "success" ]; then
+          echo "✅ Database backup completed successfully"
+        else
+          echo "❌ Database backup failed"
+        fi
+
