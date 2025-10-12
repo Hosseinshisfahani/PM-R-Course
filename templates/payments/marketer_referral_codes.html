@@ -1,0 +1,281 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}مدیریت کدهای معرفی - آکادمی آقای استخوان{% endblock %}
+
+{% block extra_css %}
+<style>
+    .referral-container {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 2rem 0;
+    }
+    
+    .referral-header {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+    }
+    
+    .referral-title {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: var(--text-dark);
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    
+    .referral-subtitle {
+        color: var(--text-light);
+        font-size: 1.1rem;
+    }
+    
+    .referral-content {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    }
+    
+    .referral-card {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+    }
+    
+    .referral-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+    }
+    
+    .code-badge {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 25px;
+        font-weight: 700;
+        font-size: 1.1rem;
+        letter-spacing: 1px;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin: 1rem 0;
+    }
+    
+    .stat-item {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        padding: 1rem;
+        border-radius: 10px;
+        text-align: center;
+    }
+    
+    .stat-value {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: var(--primary-color);
+    }
+    
+    .stat-label {
+        color: var(--text-light);
+        font-size: 0.9rem;
+        margin-top: 0.25rem;
+    }
+    
+    .btn-create {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        border: none;
+        color: white;
+        padding: 12px 24px;
+        border-radius: 50px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+    }
+    
+    .btn-create:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+        color: white;
+    }
+    
+    .status-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+    
+    .status-active {
+        background: #dcfce7;
+        color: #166534;
+    }
+    
+    .status-inactive {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+    
+    .usage-progress {
+        height: 8px;
+        background: #e5e7eb;
+        border-radius: 4px;
+        overflow: hidden;
+        margin-top: 0.5rem;
+    }
+    
+    .usage-progress-fill {
+        height: 100%;
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        border-radius: 4px;
+        transition: width 0.3s ease;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="referral-container">
+    <div class="container">
+        <!-- Header -->
+        <div class="referral-header" data-aos="fade-down">
+            <h1 class="referral-title">
+                <i class="fas fa-gift"></i>
+                مدیریت کدهای معرفی
+            </h1>
+            <p class="referral-subtitle">کدهای معرفی خود را مدیریت کنید و کمیسیون کسب کنید</p>
+        </div>
+        
+        <div class="row">
+            <div class="col-12">
+                <div class="referral-content" data-aos="fade-up">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h3>کدهای معرفی شما</h3>
+                        <a href="{% url 'payments:create_referral_code' %}" class="btn btn-create">
+                            <i class="fas fa-plus me-2"></i>
+                            ایجاد کد جدید
+                        </a>
+                    </div>
+                    
+                    {% if referral_codes %}
+                        {% for code in referral_codes %}
+                        <div class="referral-card" data-aos="fade-up" data-aos-delay="{{ forloop.counter0|add:100 }}">
+                            <div class="row align-items-center">
+                                <div class="col-md-3">
+                                    <div class="code-badge">{{ code.code }}</div>
+                                    <div class="mt-2">
+                                        <span class="status-badge {% if code.is_active %}status-active{% else %}status-inactive{% endif %}">
+                                            {% if code.is_active %}فعال{% else %}غیرفعال{% endif %}
+                                        </span>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <div class="stats-grid">
+                                        <div class="stat-item">
+                                            <div class="stat-value">{{ code.discount_percentage }}%</div>
+                                            <div class="stat-label">تخفیف مشتری</div>
+                                        </div>
+                                        <div class="stat-item">
+                                            <div class="stat-value">{{ code.commission_percentage }}%</div>
+                                            <div class="stat-label">کمیسیون شما</div>
+                                        </div>
+                                        <div class="stat-item">
+                                            <div class="stat-value">{{ code.current_uses }}</div>
+                                            <div class="stat-label">تعداد استفاده</div>
+                                        </div>
+                                    </div>
+                                    
+                                    {% if code.max_uses %}
+                                    <div class="mt-2">
+                                        <small class="text-muted">استفاده: {{ code.current_uses }}/{{ code.max_uses }}</small>
+                                        <div class="usage-progress">
+                                            <div class="usage-progress-fill" style="width: {% widthratio code.current_uses code.max_uses 100 %}%"></div>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="col-md-3 text-end">
+                                    <div class="text-muted small mb-2">
+                                        ایجاد شده: {{ code.created_at|date:"Y/m/d" }}
+                                    </div>
+                                    <div class="btn-group">
+                                        <button class="btn btn-outline-primary btn-sm" onclick="copyToClipboard('{{ code.code }}')">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                        <a href="{% url 'payments:marketer_commissions' %}" class="btn btn-outline-success btn-sm">
+                                            <i class="fas fa-chart-line"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-gift fa-4x text-muted mb-3"></i>
+                            <h4>هنوز کد معرفی ایجاد نکرده‌اید</h4>
+                            <p class="text-muted">کد معرفی ایجاد کنید و شروع به کسب کمیسیون کنید</p>
+                            <a href="{% url 'payments:create_referral_code' %}" class="btn btn-create">
+                                <i class="fas fa-plus me-2"></i>
+                                ایجاد اولین کد معرفی
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function copyToClipboard(text) {
+        navigator.clipboard.writeText(text).then(function() {
+            // Show success message
+            const toast = document.createElement('div');
+            toast.className = 'toast-notification';
+            toast.innerHTML = '<i class="fas fa-check-circle me-2"></i>کد کپی شد!';
+            toast.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: #10b981;
+                color: white;
+                padding: 12px 20px;
+                border-radius: 8px;
+                z-index: 9999;
+                animation: slideIn 0.3s ease;
+            `;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        });
+    }
+    
+    // Add CSS for animation
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+    `;
+    document.head.appendChild(style);
+</script>
+{% endblock %}

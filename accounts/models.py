@@ -19,6 +19,10 @@ class User(AbstractUser):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
+    class Meta:
+        verbose_name = "کاربر"
+        verbose_name_plural = "کاربران"
+    
     def __str__(self):
         return f"{self.username} ({self.get_user_type_display()})"
     

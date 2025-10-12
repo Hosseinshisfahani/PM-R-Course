@@ -4,7 +4,6 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { marketerApi } from '@/lib/api';
-import Layout from '@/components/Layout';
 
 export default function MarketerJoinPage() {
   const { user } = useAuth();
@@ -34,7 +33,7 @@ export default function MarketerJoinPage() {
       await marketerApi.createRequest(formData);
       setSuccess(true);
     } catch (error: any) {
-      setError(error.message || 'Failed to submit application');
+      setError(error.message || 'خطا در ارسال درخواست. لطفا دوباره تلاش کنید.');
     } finally {
       setLoading(false);
     }
@@ -49,78 +48,268 @@ export default function MarketerJoinPage() {
 
   if (!user) {
     return (
-      <Layout>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold text-gray-900 mb-4">Please log in to join as a marketer</h1>
+      <div className="min-vh-100 d-flex align-items-center justify-content-center bg-light">
+        <div className="container">
+          <div className="row justify-content-center">
+            <div className="col-md-6 col-lg-5">
+              <div className="card border-0 shadow-lg">
+                <div className="card-body p-5 text-center">
+                  <div className="mb-4">
+                    <i className="fas fa-user-lock fa-4x text-primary"></i>
+                  </div>
+                  <h2 className="h4 mb-3">ورود به حساب کاربری</h2>
+                  <p className="text-muted mb-4">
+                    برای پیوستن به تیم بازاریابان ما، ابتدا وارد حساب کاربری خود شوید
+                  </p>
             <button
               onClick={() => router.push('/login')}
-              className="bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors"
+                    className="btn btn-primary btn-lg px-5"
             >
-              Login
+                    <i className="fas fa-sign-in-alt me-2"></i>
+                    ورود
             </button>
+                  <div className="mt-3">
+                    <small className="text-muted">
+                      حساب کاربری ندارید؟{' '}
+                      <a href="/signup" className="text-primary">ثبت‌نام کنید</a>
+                    </small>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-      </Layout>
+      </div>
     );
   }
 
   if (success) {
     return (
-      <Layout>
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="text-center">
-            <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mb-4">
-              <svg className="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
+      <div className="min-vh-100 d-flex align-items-center justify-content-center bg-light">
+        <div className="container">
+          <div className="row justify-content-center">
+            <div className="col-md-8 col-lg-6">
+              <div className="card border-0 shadow-lg">
+                <div className="card-body p-5 text-center">
+                  <div className="mb-4">
+                    <div className="bg-success bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center" 
+                         style={{ width: '100px', height: '100px' }}>
+                      <i className="fas fa-check fa-3x text-success"></i>
+                    </div>
             </div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-4">Application Submitted!</h1>
-            <p className="text-lg text-gray-600 mb-8">
-              Thank you for your interest in joining our marketer program. 
-              We'll review your application and get back to you within 2-3 business days.
-            </p>
-            <div className="space-y-4">
+                  <h2 className="h3 mb-3">درخواست شما با موفقیت ارسال شد!</h2>
+                  <p className="text-muted mb-4 lead">
+                    از علاقه شما به پیوستن به تیم بازاریابان ما سپاسگزاریم.
+                    درخواست شما در اسرع وقت بررسی خواهد شد و نتیجه از طریق ایمیل یا تلفن به شما اطلاع داده خواهد شد.
+                  </p>
+                  <div className="alert alert-info border-0 mb-4">
+                    <i className="fas fa-info-circle me-2"></i>
+                    زمان بررسی درخواست: 2 تا 3 روز کاری
+                  </div>
+                  <div className="d-grid gap-3">
               <button
                 onClick={() => router.push('/marketers/request-status')}
-                className="bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors"
+                      className="btn btn-primary btn-lg"
               >
-                Check Application Status
+                      <i className="fas fa-eye me-2"></i>
+                      مشاهده وضعیت درخواست
               </button>
-              <div>
                 <button
                   onClick={() => router.push('/')}
-                  className="text-blue-600 hover:text-blue-800 font-medium"
+                      className="btn btn-outline-secondary"
                 >
-                  Back to Home
+                      <i className="fas fa-home me-2"></i>
+                      بازگشت به صفحه اصلی
                 </button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </Layout>
+      </div>
     );
   }
 
   return (
-    <Layout>
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">Join Our Marketer Program</h1>
-          <p className="text-lg text-gray-600">
-            Earn commissions by promoting our medical courses to your network
-          </p>
+    <div className="marketer-join-page">
+      {/* Hero Section */}
+      <section className="hero-section py-5" style={{
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        color: 'white'
+      }}>
+        <div className="container py-5">
+          <div className="row align-items-center">
+            <div className="col-lg-6 mb-4 mb-lg-0" data-aos="fade-right">
+              <h1 className="display-4 fw-bold mb-4">
+                به تیم فروشندگان ما بپیوندید
+              </h1>
+              <p className="lead mb-4">
+                با معرفی دوره‌های آموزشی ما به دیگران، درآمد کسب کنید و به رشد علم و آگاهی جامعه کمک کنید
+              </p>
+              <div className="d-flex gap-3 mb-4">
+                <div className="text-center">
+                  <h3 className="fw-bold">10-20%</h3>
+                  <small>کمیسیون فروش</small>
+                </div>
+                <div className="border-end border-white border-opacity-25"></div>
+                <div className="text-center">
+                  <h3 className="fw-bold">رایگان</h3>
+                  <small>ثبت‌نام و عضویت</small>
+                </div>
+                <div className="border-end border-white border-opacity-25"></div>
+                <div className="text-center">
+                  <h3 className="fw-bold">نامحدود</h3>
+                  <small>درآمد ماهانه</small>
+                </div>
+              </div>
+            </div>
+            <div className="col-lg-6" data-aos="fade-left">
+              <div className="bg-white bg-opacity-10 backdrop-blur rounded-4 p-4">
+                <div className="row g-3">
+                  <div className="col-6">
+                    <div className="card border-0 bg-white text-center h-100 hover-lift">
+                      <div className="card-body">
+                        <div className="bg-success bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                             style={{ width: '60px', height: '60px' }}>
+                          <i className="fas fa-chart-line fa-2x text-success"></i>
+                        </div>
+                        <h6 className="fw-bold">رشد مداوم</h6>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="col-6">
+                    <div className="card border-0 bg-white text-center h-100 hover-lift">
+                      <div className="card-body">
+                        <div className="bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                             style={{ width: '60px', height: '60px' }}>
+                          <i className="fas fa-users fa-2x text-primary"></i>
+                        </div>
+                        <h6 className="fw-bold">تیم حرفه‌ای</h6>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="col-6">
+                    <div className="card border-0 bg-white text-center h-100 hover-lift">
+                      <div className="card-body">
+                        <div className="bg-warning bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                             style={{ width: '60px', height: '60px' }}>
+                          <i className="fas fa-gift fa-2x text-warning"></i>
+                        </div>
+                        <h6 className="fw-bold">پاداش‌های ویژه</h6>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="col-6">
+                    <div className="card border-0 bg-white text-center h-100 hover-lift">
+                      <div className="card-body">
+                        <div className="bg-info bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                             style={{ width: '60px', height: '60px' }}>
+                          <i className="fas fa-headset fa-2x text-info"></i>
+                        </div>
+                        <h6 className="fw-bold">پشتیبانی 24/7</h6>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
+      </section>
 
-        <div className="bg-white rounded-lg shadow-sm border p-8">
-          <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Benefits Section */}
+      <section className="py-5 bg-light">
+        <div className="container">
+          <div className="text-center mb-5" data-aos="fade-up">
+            <h2 className="h1 mb-3">چرا به ما بپیوندید؟</h2>
+            <p className="lead text-muted">مزایای عضویت در تیم بازاریابان ما</p>
+          </div>
+          <div className="row g-4">
+            <div className="col-md-6 col-lg-3" data-aos="fade-up" data-aos-delay="100">
+              <div className="card border-0 shadow-sm h-100 text-center hover-lift">
+                <div className="card-body p-4">
+                  <div className="bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                       style={{ width: '70px', height: '70px' }}>
+                    <i className="fas fa-dollar-sign fa-2x text-primary"></i>
+                  </div>
+                  <h5 className="card-title">درآمد بالا</h5>
+                  <p className="card-text text-muted">
+                    با هر فروش، کمیسیون 10 تا 20 درصد دریافت کنید
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div className="col-md-6 col-lg-3" data-aos="fade-up" data-aos-delay="200">
+              <div className="card border-0 shadow-sm h-100 text-center hover-lift">
+                <div className="card-body p-4">
+                  <div className="bg-success bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                       style={{ width: '70px', height: '70px' }}>
+                    <i className="fas fa-clock fa-2x text-success"></i>
+                  </div>
+                  <h5 className="card-title">زمان انعطاف‌پذیر</h5>
+                  <p className="card-text text-muted">
+                    در هر زمان و مکانی که می‌خواهید کار کنید
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div className="col-md-6 col-lg-3" data-aos="fade-up" data-aos-delay="300">
+              <div className="card border-0 shadow-sm h-100 text-center hover-lift">
+                <div className="card-body p-4">
+                  <div className="bg-warning bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                       style={{ width: '70px', height: '70px' }}>
+                    <i className="fas fa-graduation-cap fa-2x text-warning"></i>
+                  </div>
+                  <h5 className="card-title">آموزش رایگان</h5>
+                  <p className="card-text text-muted">
+                    دسترسی به آموزش‌های بازاریابی و فروش
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div className="col-md-6 col-lg-3" data-aos="fade-up" data-aos-delay="400">
+              <div className="card border-0 shadow-sm h-100 text-center hover-lift">
+                <div className="card-body p-4">
+                  <div className="bg-info bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                       style={{ width: '70px', height: '70px' }}>
+                    <i className="fas fa-chart-bar fa-2x text-info"></i>
+                  </div>
+                  <h5 className="card-title">گزارش‌های دقیق</h5>
+                  <p className="card-text text-muted">
+                    مشاهده آمار فروش و درآمد خود به صورت لحظه‌ای
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Application Form */}
+      <section className="py-5">
+        <div className="container">
+          <div className="row justify-content-center">
+            <div className="col-lg-10">
+              <div className="card border-0 shadow-lg">
+                <div className="card-header bg-primary text-white text-center py-4">
+                  <h3 className="mb-0">
+                    <i className="fas fa-file-alt me-2"></i>
+                    فرم درخواست عضویت
+                  </h3>
+                </div>
+                <div className="card-body p-4 p-md-5">
+                  <form onSubmit={handleSubmit}>
             {/* Personal Information */}
-            <div>
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Personal Information</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Full Name *
+                    <div className="mb-5">
+                      <h5 className="mb-4">
+                        <i className="fas fa-user me-2 text-primary"></i>
+                        اطلاعات شخصی
+                      </h5>
+                      <div className="row g-3">
+                        <div className="col-md-6">
+                          <label className="form-label fw-bold">
+                            نام و نام خانوادگی <span className="text-danger">*</span>
                   </label>
                   <input
                     type="text"
@@ -128,12 +317,13 @@ export default function MarketerJoinPage() {
                     value={formData.full_name}
                     onChange={handleChange}
                     required
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="form-control form-control-lg"
+                            placeholder="نام کامل خود را وارد کنید"
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Phone Number *
+                        <div className="col-md-6">
+                          <label className="form-label fw-bold">
+                            شماره تماس <span className="text-danger">*</span>
                   </label>
                   <input
                     type="tel"
@@ -141,73 +331,81 @@ export default function MarketerJoinPage() {
                     value={formData.phone_number}
                     onChange={handleChange}
                     required
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="form-control form-control-lg"
+                            placeholder="09123456789"
+                            dir="ltr"
                   />
                 </div>
               </div>
             </div>
 
             {/* Professional Information */}
-            <div>
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Professional Information</h3>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Experience Level *
+                    <div className="mb-5">
+                      <h5 className="mb-4">
+                        <i className="fas fa-briefcase me-2 text-primary"></i>
+                        اطلاعات حرفه‌ای
+                      </h5>
+                      <div className="row g-3">
+                        <div className="col-md-6">
+                          <label className="form-label fw-bold">
+                            سطح تجربه <span className="text-danger">*</span>
                   </label>
                   <select
                     name="experience_level"
                     value={formData.experience_level}
                     onChange={handleChange}
                     required
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="beginner">Beginner</option>
-                    <option value="intermediate">Intermediate</option>
-                    <option value="advanced">Advanced</option>
-                    <option value="expert">Expert</option>
+                            className="form-select form-select-lg"
+                          >
+                            <option value="beginner">مبتدی</option>
+                            <option value="intermediate">متوسط</option>
+                            <option value="advanced">پیشرفته</option>
+                            <option value="expert">متخصص</option>
                   </select>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Current Job
+                        <div className="col-md-6">
+                          <label className="form-label fw-bold">
+                            شغل فعلی
                   </label>
                   <input
                     type="text"
                     name="current_job"
                     value={formData.current_job}
                     onChange={handleChange}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="form-control form-control-lg"
+                            placeholder="مثال: بازاریاب دیجیتال"
                   />
                 </div>
               </div>
             </div>
 
             {/* Interest and Motivation */}
-            <div>
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Interest and Motivation</h3>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Interest Area *
+                    <div className="mb-5">
+                      <h5 className="mb-4">
+                        <i className="fas fa-heart me-2 text-primary"></i>
+                        علاقه‌مندی و انگیزه
+                      </h5>
+                      <div className="mb-3">
+                        <label className="form-label fw-bold">
+                          حوزه مورد علاقه <span className="text-danger">*</span>
                   </label>
                   <select
                     name="interest_area"
                     value={formData.interest_area}
                     onChange={handleChange}
                     required
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="medical">Medical and Health Courses</option>
-                    <option value="technology">Technology Courses</option>
-                    <option value="business">Business Courses</option>
-                    <option value="education">Education Courses</option>
-                    <option value="all">All Topics</option>
+                          className="form-select form-select-lg"
+                        >
+                          <option value="medical">دوره‌های پزشکی و سلامت</option>
+                          <option value="technology">دوره‌های تکنولوژی</option>
+                          <option value="business">دوره‌های کسب و کار</option>
+                          <option value="education">دوره‌های آموزشی</option>
+                          <option value="all">همه موضوعات</option>
                   </select>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Why do you want to join our marketer program? *
+                      <div className="mb-3">
+                        <label className="form-label fw-bold">
+                          چرا می‌خواهید به تیم ما بپیوندید؟ <span className="text-danger">*</span>
                   </label>
                   <textarea
                     name="motivation"
@@ -215,96 +413,187 @@ export default function MarketerJoinPage() {
                     onChange={handleChange}
                     required
                     rows={4}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Tell us about your motivation and goals..."
+                          className="form-control"
+                          placeholder="انگیزه و اهداف خود را برای ما بنویسید..."
                   />
+                        <small className="form-text text-muted">
+                          حداقل 50 کاراکتر
+                        </small>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Marketing Experience
+                        <label className="form-label fw-bold">
+                          تجربه بازاریابی
                   </label>
                   <textarea
                     name="marketing_experience"
                     value={formData.marketing_experience}
                     onChange={handleChange}
                     rows={3}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Describe your previous marketing experience..."
+                          className="form-control"
+                          placeholder="تجربیات قبلی خود در زمینه بازاریابی را شرح دهید..."
                   />
-                </div>
               </div>
             </div>
 
             {/* Social Media */}
-            <div>
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Social Media (Optional)</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Instagram Handle
+                    <div className="mb-5">
+                      <h5 className="mb-4">
+                        <i className="fas fa-share-alt me-2 text-primary"></i>
+                        شبکه‌های اجتماعی (اختیاری)
+                      </h5>
+                      <div className="row g-3">
+                        <div className="col-md-6">
+                          <label className="form-label fw-bold">
+                            <i className="fab fa-instagram me-2 text-danger"></i>
+                            اینستاگرام
                   </label>
                   <input
                     type="text"
                     name="instagram_handle"
                     value={formData.instagram_handle}
                     onChange={handleChange}
+                            className="form-control form-control-lg"
                     placeholder="@username"
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            dir="ltr"
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Telegram Handle
+                        <div className="col-md-6">
+                          <label className="form-label fw-bold">
+                            <i className="fab fa-telegram me-2 text-info"></i>
+                            تلگرام
                   </label>
                   <input
                     type="text"
                     name="telegram_handle"
                     value={formData.telegram_handle}
                     onChange={handleChange}
+                            className="form-control form-control-lg"
                     placeholder="@username"
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            dir="ltr"
                   />
                 </div>
               </div>
             </div>
 
             {error && (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                <div className="flex">
-                  <div className="flex-shrink-0">
-                    <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                  <div className="ml-3">
-                    <h3 className="text-sm font-medium text-red-800">Error</h3>
-                    <div className="mt-2 text-sm text-red-700">
-                      <p>{error}</p>
-                    </div>
-                  </div>
-                </div>
+                      <div className="alert alert-danger d-flex align-items-center mb-4" role="alert">
+                        <i className="fas fa-exclamation-triangle me-3"></i>
+                        <div>{error}</div>
               </div>
             )}
 
-            <div className="flex justify-end space-x-4">
+                    <div className="d-flex gap-3 justify-content-end">
               <button
                 type="button"
                 onClick={() => router.push('/')}
-                className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                        className="btn btn-outline-secondary btn-lg px-5"
               >
-                Cancel
+                        <i className="fas fa-times me-2"></i>
+                        انصراف
               </button>
               <button
                 type="submit"
                 disabled={loading}
-                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed transition-colors"
-              >
-                {loading ? 'Submitting...' : 'Submit Application'}
+                        className="btn btn-primary btn-lg px-5"
+                      >
+                        {loading ? (
+                          <>
+                            <span className="spinner-border spinner-border-sm me-2"></span>
+                            در حال ارسال...
+                          </>
+                        ) : (
+                          <>
+                            <i className="fas fa-paper-plane me-2"></i>
+                            ارسال درخواست
+                          </>
+                        )}
               </button>
             </div>
           </form>
         </div>
       </div>
-    </Layout>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section className="py-5 bg-light">
+        <div className="container">
+          <div className="text-center mb-5" data-aos="fade-up">
+            <h2 className="h1 mb-3">سوالات متداول</h2>
+            <p className="lead text-muted">پاسخ سوالات رایج درباره عضویت در تیم بازاریابان</p>
+          </div>
+          <div className="row justify-content-center">
+            <div className="col-lg-8">
+              <div className="accordion" id="faqAccordion">
+                <div className="accordion-item border-0 shadow-sm mb-3">
+                  <h2 className="accordion-header">
+                    <button className="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
+                      <i className="fas fa-question-circle me-2 text-primary"></i>
+                      چگونه می‌توانم درآمد کسب کنم؟
+                    </button>
+                  </h2>
+                  <div id="faq1" className="accordion-collapse collapse show" data-bs-parent="#faqAccordion">
+                    <div className="accordion-body">
+                      با معرفی دوره‌های ما به دیگران و دریافت کد تخفیف اختصاصی، از هر فروش کمیسیون 10 تا 20 درصد دریافت می‌کنید.
+                    </div>
+                  </div>
+                </div>
+                <div className="accordion-item border-0 shadow-sm mb-3">
+                  <h2 className="accordion-header">
+                    <button className="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
+                      <i className="fas fa-question-circle me-2 text-primary"></i>
+                      چه زمانی درآمدم پرداخت می‌شود؟
+                    </button>
+                  </h2>
+                  <div id="faq2" className="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                    <div className="accordion-body">
+                      درآمد شما به صورت ماهانه و تا پایان هر ماه واریز می‌شود.
+                    </div>
+                  </div>
+                </div>
+                <div className="accordion-item border-0 shadow-sm mb-3">
+                  <h2 className="accordion-header">
+                    <button className="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
+                      <i className="fas fa-question-circle me-2 text-primary"></i>
+                      آیا نیاز به تجربه قبلی دارم؟
+                    </button>
+                  </h2>
+                  <div id="faq3" className="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                    <div className="accordion-body">
+                      خیر، هیچ تجربه قبلی لازم نیست. ما آموزش‌های لازم را به شما ارائه می‌دهیم.
+                    </div>
+                  </div>
+                </div>
+                <div className="accordion-item border-0 shadow-sm">
+                  <h2 className="accordion-header">
+                    <button className="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq4">
+                      <i className="fas fa-question-circle me-2 text-primary"></i>
+                      چند وقت طول می‌کشد تا درخواستم بررسی شود؟
+                    </button>
+                  </h2>
+                  <div id="faq4" className="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                    <div className="accordion-body">
+                      معمولا ظرف 2 تا 3 روز کاری درخواست شما بررسی و نتیجه به شما اطلاع داده می‌شود.
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <style jsx>{`
+        .hover-lift {
+          transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .hover-lift:hover {
+          transform: translateY(-5px);
+          box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+        }
+      `}</style>
+    </div>
   );
 }

@@ -1,0 +1,342 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}کمیسیون‌های من - آکادمی آقای استخوان{% endblock %}
+
+{% block extra_css %}
+<style>
+    .commission-container {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 2rem 0;
+    }
+    
+    .commission-header {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+    }
+    
+    .commission-title {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: var(--text-dark);
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    
+    .commission-subtitle {
+        color: var(--text-light);
+        font-size: 1.1rem;
+    }
+    
+    .commission-content {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+    }
+    
+    .stat-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .stat-icon.paid {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+    }
+    
+    .stat-icon.pending {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        color: white;
+    }
+    
+    .stat-icon.total {
+        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+        color: white;
+    }
+    
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 800;
+        color: var(--text-dark);
+        margin-bottom: 0.5rem;
+    }
+    
+    .stat-label {
+        color: var(--text-light);
+        font-size: 0.9rem;
+    }
+    
+    .commission-item {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+    }
+    
+    .commission-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+    }
+    
+    .status-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+    
+    .status-paid {
+        background: #dcfce7;
+        color: #166534;
+    }
+    
+    .status-pending {
+        background: #fef3c7;
+        color: #92400e;
+    }
+    
+    .status-cancelled {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+    
+    .commission-amount {
+        font-size: 1.25rem;
+        font-weight: 800;
+        color: var(--accent-color);
+    }
+    
+    .pagination {
+        justify-content: center;
+        margin-top: 2rem;
+    }
+    
+    .page-link {
+        border-radius: 10px;
+        margin: 0 2px;
+        border: none;
+        color: var(--primary-color);
+    }
+    
+    .page-item.active .page-link {
+        background: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="commission-container">
+    <div class="container">
+        <!-- Header -->
+        <div class="commission-header" data-aos="fade-down">
+            <h1 class="commission-title">
+                <i class="fas fa-coins"></i>
+                کمیسیون‌های من
+            </h1>
+            <p class="commission-subtitle">پیگیری درآمدهای حاصل از کدهای معرفی</p>
+        </div>
+        
+        <div class="row">
+            <div class="col-12">
+                <div class="commission-content" data-aos="fade-up">
+                    <!-- Stats -->
+                    <div class="stats-grid">
+                        <div class="stat-card" data-aos="fade-up" data-aos-delay="100">
+                            <div class="stat-icon paid">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <div class="stat-value">{{ total_commission|floatformat:0 }} تومان</div>
+                            <div class="stat-label">کمیسیون پرداخت شده</div>
+                        </div>
+                        
+                        <div class="stat-card" data-aos="fade-up" data-aos-delay="200">
+                            <div class="stat-icon pending">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div class="stat-value">{{ pending_commission|floatformat:0 }} تومان</div>
+                            <div class="stat-label">کمیسیون در انتظار</div>
+                        </div>
+                        
+                        <div class="stat-card" data-aos="fade-up" data-aos-delay="300">
+                            <div class="stat-icon total">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <div class="stat-value">{{ commissions|length }}</div>
+                            <div class="stat-label">تعداد کمیسیون‌ها</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Commissions List -->
+                    <h3 class="mb-4">
+                        <i class="fas fa-list me-2"></i>
+                        تاریخچه کمیسیون‌ها
+                    </h3>
+                    
+                    {% if commissions %}
+                        {% for commission in commissions %}
+                        <div class="commission-item" data-aos="fade-up" data-aos-delay="{{ forloop.counter0|add:100 }}">
+                            <div class="row align-items-center">
+                                <div class="col-md-3">
+                                    <div class="commission-amount">{{ commission.amount|floatformat:0 }} تومان</div>
+                                    <div class="text-muted small">
+                                        {{ commission.created_at|date:"Y/m/d H:i" }}
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-4">
+                                    <div class="mb-1">
+                                        <strong>کد معرفی:</strong> {{ commission.referral_usage.referral_code.code }}
+                                    </div>
+                                    <div class="mb-1">
+                                        <strong>مشتری:</strong> {{ commission.referral_usage.customer.get_full_name|default:commission.referral_usage.customer.username }}
+                                    </div>
+                                    <div class="mb-1">
+                                        <strong>دوره:</strong> 
+                                        {% if commission.referral_usage.purchase.course %}
+                                            {{ commission.referral_usage.purchase.course.title }}
+                                        {% elif commission.referral_usage.purchase.section %}
+                                            {{ commission.referral_usage.purchase.section.title }}
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-3">
+                                    <div class="mb-1">
+                                        <strong>مبلغ خرید:</strong> {{ commission.referral_usage.purchase.original_amount|floatformat:0 }} تومان
+                                    </div>
+                                    <div class="mb-1">
+                                        <strong>تخفیف مشتری:</strong> {{ commission.referral_usage.discount_amount|floatformat:0 }} تومان
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-2 text-end">
+                                    <span class="status-badge status-{{ commission.status }}">
+                                        {{ commission.get_status_display }}
+                                    </span>
+                                    {% if commission.paid_at %}
+                                    <div class="text-muted small mt-1">
+                                        پرداخت: {{ commission.paid_at|date:"Y/m/d" }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        
+                        <!-- Pagination -->
+                        {% if is_paginated %}
+                        <nav aria-label="Page navigation">
+                            <ul class="pagination">
+                                {% if page_obj.has_previous %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page=1">اول</a>
+                                    </li>
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}">قبلی</a>
+                                    </li>
+                                {% endif %}
+                                
+                                {% for num in page_obj.paginator.page_range %}
+                                    {% if page_obj.number == num %}
+                                        <li class="page-item active">
+                                            <span class="page-link">{{ num }}</span>
+                                        </li>
+                                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                                        </li>
+                                    {% endif %}
+                                {% endfor %}
+                                
+                                {% if page_obj.has_next %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_obj.next_page_number }}">بعدی</a>
+                                    </li>
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">آخر</a>
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                        {% endif %}
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-coins fa-4x text-muted mb-3"></i>
+                            <h4>هنوز کمیسیونی دریافت نکرده‌اید</h4>
+                            <p class="text-muted">کد معرفی ایجاد کنید و شروع به کسب کمیسیون کنید</p>
+                            <a href="{% url 'payments:create_referral_code' %}" class="btn btn-primary">
+                                <i class="fas fa-plus me-2"></i>
+                                ایجاد کد معرفی
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add animation to commission items
+        const commissionItems = document.querySelectorAll('.commission-item');
+        commissionItems.forEach((item, index) => {
+            item.style.animationDelay = `${index * 0.1}s`;
+        });
+        
+        // Add hover effects to stat cards
+        const statCards = document.querySelectorAll('.stat-card');
+        statCards.forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-5px)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        });
+    });
+</script>
+{% endblock %}

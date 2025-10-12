@@ -1,21 +1,26 @@
 'use client';
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import Layout from '@/components/Layout';
 
 export default function LoginPage() {
-  const { login } = useAuth();
-  const router = useRouter();
+  const [formData, setFormData] = useState({
+    username: '',
+    password: ''
+  });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const { login } = useAuth();
+  const router = useRouter();
 
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-  });
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,103 +28,153 @@ export default function LoginPage() {
     setError('');
 
     try {
-      await login(formData.email, formData.password);
+      await login(formData.username, formData.password);
       router.push('/');
-    } catch (error: any) {
-      setError(error.message || 'Login failed');
+    } catch (err: any) {
+      setError(err.message || 'خطا در ورود. لطفاً دوباره تلاش کنید.');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
-  };
-
   return (
-    <Layout>
-      <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-md w-full space-y-8">
-          <div>
-            <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-              Sign in to your account
-            </h2>
-            <p className="mt-2 text-center text-sm text-gray-600">
-              Or{' '}
-              <Link href="/signup" className="font-medium text-blue-600 hover:text-blue-500">
-                create a new account
-              </Link>
-            </p>
-          </div>
-          <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-            <div className="rounded-md shadow-sm -space-y-px">
-              <div>
-                <label htmlFor="email" className="sr-only">
-                  Email address
-                </label>
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  required
-                  value={formData.email}
-                  onChange={handleChange}
-                  className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                  placeholder="Email address"
-                />
-              </div>
-              <div>
-                <label htmlFor="password" className="sr-only">
-                  Password
-                </label>
-                <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  autoComplete="current-password"
-                  required
-                  value={formData.password}
-                  onChange={handleChange}
-                  className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                  placeholder="Password"
-                />
-              </div>
-            </div>
+    <div className="py-5" style={{ 
+      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      minHeight: '100vh'
+    }}>
+      <div className="container">
+        <div className="row justify-content-center">
+          <div className="col-lg-5 col-md-7">
+            <div className="card border-0 shadow-lg" style={{ borderRadius: '20px' }} data-aos="fade-up">
+              <div className="card-body p-5">
+                {/* Header */}
+                <div className="text-center mb-4">
+                  <div className="bg-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style={{ width: '80px', height: '80px' }}>
+                    <i className="fas fa-graduation-cap fa-2x text-white"></i>
+                  </div>
+                  <h3 className="fw-bold text-primary">ورود به آکادمی</h3>
+                  <p className="text-muted">به حساب کاربری خود وارد شوید</p>
+                </div>
 
-            {error && (
-              <div className="bg-red-50 border border-red-200 rounded-md p-4">
-                <div className="flex">
-                  <div className="flex-shrink-0">
-                    <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                    </svg>
+                {/* Error Message */}
+                {error && (
+                  <div className="alert alert-danger" role="alert">
+                    <i className="fas fa-exclamation-circle me-2"></i>
+                    {error}
                   </div>
-                  <div className="ml-3">
-                    <h3 className="text-sm font-medium text-red-800">Error</h3>
-                    <div className="mt-2 text-sm text-red-700">
-                      <p>{error}</p>
+                )}
+
+                {/* Login Form */}
+                <form onSubmit={handleSubmit}>
+                  <div className="mb-3">
+                    <label htmlFor="username" className="form-label">
+                      <i className="fas fa-user me-2 text-primary"></i>
+                      نام کاربری یا ایمیل
+                    </label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      id="username"
+                      name="username"
+                      value={formData.username}
+                      onChange={handleChange}
+                      required
+                      style={{ borderRadius: '10px' }}
+                      placeholder="نام کاربری یا ایمیل خود را وارد کنید"
+                    />
+                  </div>
+
+                  <div className="mb-4">
+                    <label htmlFor="password" className="form-label">
+                      <i className="fas fa-lock me-2 text-primary"></i>
+                      رمز عبور
+                    </label>
+                    <input
+                      type="password"
+                      className="form-control"
+                      id="password"
+                      name="password"
+                      value={formData.password}
+                      onChange={handleChange}
+                      required
+                      style={{ borderRadius: '10px' }}
+                      placeholder="رمز عبور خود را وارد کنید"
+                    />
+                  </div>
+
+                  <div className="d-flex justify-content-between align-items-center mb-4">
+                    <div className="form-check">
+                      <input className="form-check-input" type="checkbox" id="rememberMe" />
+                      <label className="form-check-label" htmlFor="rememberMe">
+                        مرا به خاطر بسپار
+                      </label>
                     </div>
+                    <Link href="/forgot-password" className="text-primary text-decoration-none">
+                      فراموشی رمز عبور؟
+                    </Link>
                   </div>
+
+                  <button
+                    type="submit"
+                    className="btn btn-primary w-100 py-3"
+                    disabled={loading}
+                    style={{ 
+                      borderRadius: '50px',
+                      background: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
+                      border: 'none',
+                      fontWeight: '600'
+                    }}
+                  >
+                    {loading ? (
+                      <>
+                        <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                        در حال ورود...
+                      </>
+                    ) : (
+                      <>
+                        <i className="fas fa-sign-in-alt me-2"></i>
+                        ورود
+                      </>
+                    )}
+                  </button>
+                </form>
+
+                {/* Divider */}
+                <div className="text-center my-4">
+                  <hr />
+                  <span className="bg-white px-3 text-muted">یا</span>
+                </div>
+
+                {/* Social Login */}
+                <div className="d-grid gap-2">
+                  <button className="btn btn-outline-primary" style={{ borderRadius: '50px' }}>
+                    <i className="fab fa-google me-2"></i>
+                    ورود با گوگل
+                  </button>
+                </div>
+
+                {/* Signup Link */}
+                <div className="text-center mt-4">
+                  <p className="text-muted">
+                    حساب کاربری ندارید؟{' '}
+                    <Link href="/signup" className="text-primary fw-bold text-decoration-none">
+                      ثبت‌نام کنید
+                    </Link>
+                  </p>
                 </div>
               </div>
-            )}
-
-            <div>
-              <button
-                type="submit"
-                disabled={loading}
-                className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-blue-400 disabled:cursor-not-allowed"
-              >
-                {loading ? 'Signing in...' : 'Sign in'}
-              </button>
             </div>
-          </form>
+
+            {/* Back to Home */}
+            <div className="text-center mt-4">
+              <Link href="/" className="btn btn-outline-light">
+                <i className="fas fa-arrow-right me-2"></i>
+                بازگشت به صفحه اصلی
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
-    </Layout>
+    </div>
   );
 }

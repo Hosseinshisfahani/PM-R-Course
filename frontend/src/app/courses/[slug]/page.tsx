@@ -1,289 +1,512 @@
-import React from 'react';
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { coursesApi } from '@/lib/api';
-import { Course } from '@/types';
-import Layout from '@/components/Layout';
-import { notFound } from 'next/navigation';
 
-interface CourseDetailPageProps {
-  params: {
+interface Course {
+  id: number;
+  title: string;
+  slug: string;
+  description: string;
+  short_description: string;
+  price: number;
+  discount_price?: number;
+  is_free: boolean;
+  thumbnail?: string;
+  preview_image?: string;
+  difficulty: string;
+  duration_hours: number;
+  total_sections: number;
+  total_videos: number;
+  average_rating: number;
+  total_reviews: number;
+  category: {
+    name: string;
     slug: string;
   };
+  instructor: {
+    name: string;
+    bio: string;
+    avatar?: string;
+  };
+  sections: Section[];
+  reviews: Review[];
 }
 
-async function getCourse(slug: string): Promise<Course | null> {
-  try {
-    const course = await coursesApi.getCourse(slug);
-    return course;
-  } catch (error) {
-    console.error('Failed to fetch course:', error);
-    return null;
+interface Section {
+  id: number;
+  title: string;
+  description: string;
+  order: number;
+  videos: Video[];
+}
+
+interface Video {
+  id: number;
+  title: string;
+  description: string;
+  duration: number;
+  order: number;
+  is_preview: boolean;
+  video_url?: string;
+}
+
+interface Review {
+  id: number;
+  user: {
+    first_name: string;
+    last_name: string;
+  };
+  rating: number;
+  comment: string;
+  created_at: string;
+}
+
+export default function CourseDetailPage() {
+  const params = useParams();
+  const [course, setCourse] = useState<Course | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [activeSection, setActiveSection] = useState<number | null>(null);
+  const [showAllReviews, setShowAllReviews] = useState(false);
+
+  useEffect(() => {
+    if (params.slug) {
+      fetchCourse(params.slug as string);
+    }
+  }, [params.slug]);
+
+  const fetchCourse = async (slug: string) => {
+    try {
+      setLoading(true);
+      const data = await coursesApi.getCourse(slug);
+      setCourse(data);
+      if (data.sections && data.sections.length > 0) {
+        setActiveSection(data.sections[0].id);
+      }
+    } catch (error) {
+      console.error('Error fetching course:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getDifficultyColor = (difficulty: string) => {
+    switch (difficulty) {
+      case 'beginner': return 'success';
+      case 'intermediate': return 'warning';
+      case 'advanced': return 'danger';
+      default: return 'primary';
+    }
+  };
+
+  const getDifficultyText = (difficulty: string) => {
+    switch (difficulty) {
+      case 'beginner': return 'مبتدی';
+      case 'intermediate': return 'متوسط';
+      case 'advanced': return 'پیشرفته';
+      default: return difficulty;
+    }
+  };
+
+  const formatDuration = (minutes: number) => {
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    if (hours > 0) {
+      return `${hours} ساعت ${mins} دقیقه`;
+    }
+    return `${mins} دقیقه`;
+  };
+
+  const handleAddToCart = () => {
+    if (course) {
+      // Add to cart functionality
+      console.log('Add to cart:', course.id);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="container py-5">
+        <div className="text-center">
+          <div className="spinner-border text-primary" role="status">
+            <span className="visually-hidden">در حال بارگذاری...</span>
+          </div>
+          <p className="mt-3">در حال بارگذاری دوره...</p>
+        </div>
+      </div>
+    );
   }
-}
-
-export default async function CourseDetailPage({ params }: CourseDetailPageProps) {
-  const course = await getCourse(params.slug);
 
   if (!course) {
-    notFound();
+    return (
+      <div className="container py-5">
+        <div className="text-center">
+          <i className="fas fa-exclamation-triangle fa-4x text-warning mb-3"></i>
+          <h4 className="text-muted">دوره یافت نشد</h4>
+          <p className="text-muted">دوره مورد نظر شما یافت نشد یا حذف شده است.</p>
+          <Link href="/courses" className="btn btn-primary">
+            <i className="fas fa-arrow-left me-2"></i>
+            بازگشت به لیست دوره‌ها
+          </Link>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <Layout>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="py-5">
+      <div className="container">
         {/* Breadcrumb */}
-        <nav className="flex mb-8" aria-label="Breadcrumb">
-          <ol className="inline-flex items-center space-x-1 md:space-x-3">
-            <li className="inline-flex items-center">
-              <Link href="/" className="text-gray-700 hover:text-blue-600">
-                Home
-              </Link>
+        <nav aria-label="breadcrumb" className="mb-4">
+          <ol className="breadcrumb">
+            <li className="breadcrumb-item">
+              <Link href="/">خانه</Link>
             </li>
-            <li>
-              <div className="flex items-center">
-                <svg className="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                </svg>
-                <Link href="/courses" className="ml-1 text-gray-700 hover:text-blue-600 md:ml-2">
-                  Courses
+            <li className="breadcrumb-item">
+              <Link href="/courses">دوره‌ها</Link>
+            </li>
+            {course.category && (
+              <li className="breadcrumb-item">
+                <Link href={`/courses?category=${course.category.slug}`}>
+                  {course.category.name}
                 </Link>
-              </div>
-            </li>
-            <li aria-current="page">
-              <div className="flex items-center">
-                <svg className="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                </svg>
-                <span className="ml-1 text-gray-500 md:ml-2">{course.title}</span>
-              </div>
+              </li>
+            )}
+            <li className="breadcrumb-item active" aria-current="page">
+              {course.title}
             </li>
           </ol>
         </nav>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="row">
           {/* Main Content */}
-          <div className="lg:col-span-2">
+          <div className="col-lg-8">
             {/* Course Header */}
-            <div className="mb-8">
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-sm font-medium text-blue-600 bg-blue-100 px-3 py-1 rounded-full">
-                  {course.category_name}
-                </span>
-                <span className="text-sm text-gray-500 capitalize">
-                  {course.difficulty}
-                </span>
-              </div>
-              
-              <h1 className="text-3xl font-bold text-gray-900 mb-4">
-                {course.title}
-              </h1>
-              
-              <p className="text-lg text-gray-600 mb-6">
-                {course.short_description}
-              </p>
-              
-              <div className="flex items-center space-x-6 text-sm text-gray-500">
-                <div className="flex items-center">
-                  <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  {course.duration_hours} hours
-                </div>
-                <div className="flex items-center">
-                  <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                  </svg>
-                  {course.total_videos} videos
-                </div>
-                <div className="flex items-center">
-                  <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                  </svg>
-                  {course.total_sections} sections
+            <div className="card border-0 shadow-sm mb-4" data-aos="fade-up">
+              <div className="card-body p-4">
+                <div className="row">
+                  <div className="col-md-4">
+                    {course.thumbnail ? (
+                      <img 
+                        src={course.thumbnail} 
+                        className="img-fluid rounded" 
+                        alt={course.title}
+                        style={{ width: '100%', height: '200px', objectFit: 'cover' }}
+                      />
+                    ) : (
+                      <img 
+                        src="/static/images/courses_background_medical.jpg" 
+                        className="img-fluid rounded" 
+                        alt={course.title}
+                        style={{ width: '100%', height: '200px', objectFit: 'cover' }}
+                      />
+                    )}
+                  </div>
+                  <div className="col-md-8">
+                    <h1 className="h3 mb-3">{course.title}</h1>
+                    <p className="text-muted mb-3">{course.short_description}</p>
+                    
+                    <div className="d-flex flex-wrap gap-2 mb-3">
+                      <span className={`badge bg-${getDifficultyColor(course.difficulty)}`}>
+                        {getDifficultyText(course.difficulty)}
+                      </span>
+                      {course.category && (
+                        <span className="badge bg-primary">{course.category.name}</span>
+                      )}
+                      {course.discount_price && (
+                        <span className="badge bg-danger">تخفیف ویژه</span>
+                      )}
+                      {course.is_free && (
+                        <span className="badge bg-success">رایگان</span>
+                      )}
+                    </div>
+
+                    <div className="d-flex align-items-center mb-3">
+                      <div className="rating me-3">
+                        {[...Array(5)].map((_, i) => (
+                          <i 
+                            key={i} 
+                            className={`fas fa-star ${i < Math.floor(course.average_rating || 0) ? 'text-warning' : 'text-muted'}`}
+                          ></i>
+                        ))}
+                        <span className="ms-2">({(course.average_rating || 0).toFixed(1)})</span>
+                      </div>
+                      <small className="text-muted">
+                        {course.total_reviews || 0} نظر
+                      </small>
+                    </div>
+
+                    <div className="row text-center">
+                      <div className="col-4">
+                        <div className="border-end">
+                          <h5 className="text-primary mb-1">{course.total_sections || 0}</h5>
+                          <small className="text-muted">بخش</small>
+                        </div>
+                      </div>
+                      <div className="col-4">
+                        <div className="border-end">
+                          <h5 className="text-success mb-1">{course.total_videos || 0}</h5>
+                          <small className="text-muted">ویدیو</small>
+                        </div>
+                      </div>
+                      <div className="col-4">
+                        <h5 className="text-warning mb-1">{course.duration_hours || 0}</h5>
+                        <small className="text-muted">ساعت</small>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
-
-            {/* Course Thumbnail/Preview */}
-            {course.thumbnail && (
-              <div className="mb-8">
-                <img
-                  src={course.thumbnail}
-                  alt={course.title}
-                  className="w-full h-64 object-cover rounded-lg"
-                />
-              </div>
-            )}
 
             {/* Course Description */}
-            <div className="mb-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">About This Course</h2>
-              <div 
-                className="prose max-w-none text-gray-600"
-                dangerouslySetInnerHTML={{ __html: course.description || '' }}
-              />
+            <div className="card border-0 shadow-sm mb-4" data-aos="fade-up" data-aos-delay="100">
+              <div className="card-header bg-transparent border-0">
+                <h5 className="mb-0">
+                  <i className="fas fa-info-circle text-primary me-2"></i>
+                  درباره این دوره
+                </h5>
+              </div>
+              <div className="card-body">
+                <div dangerouslySetInnerHTML={{ __html: course.description }} />
+              </div>
             </div>
 
-            {/* What You'll Learn */}
-            {course.what_you_learn && (
-              <div className="mb-8">
-                <h2 className="text-2xl font-bold text-gray-900 mb-4">What You'll Learn</h2>
-                <div className="bg-gray-50 rounded-lg p-6">
-                  <div 
-                    className="prose max-w-none text-gray-600"
-                    dangerouslySetInnerHTML={{ __html: course.what_you_learn }}
-                  />
-                </div>
+            {/* Course Content */}
+            <div className="card border-0 shadow-sm mb-4" data-aos="fade-up" data-aos-delay="200">
+              <div className="card-header bg-transparent border-0">
+                <h5 className="mb-0">
+                  <i className="fas fa-list text-primary me-2"></i>
+                  محتوای دوره
+                </h5>
               </div>
-            )}
-
-            {/* Prerequisites */}
-            {course.prerequisites && (
-              <div className="mb-8">
-                <h2 className="text-2xl font-bold text-gray-900 mb-4">Prerequisites</h2>
-                <div className="bg-yellow-50 rounded-lg p-6">
-                  <div 
-                    className="prose max-w-none text-gray-600"
-                    dangerouslySetInnerHTML={{ __html: course.prerequisites }}
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* Course Sections */}
-            {course.sections && course.sections.length > 0 && (
-              <div className="mb-8">
-                <h2 className="text-2xl font-bold text-gray-900 mb-4">Course Content</h2>
-                <div className="space-y-4">
-                  {course.sections.map((section, index) => (
-                    <div key={section.id} className="border border-gray-200 rounded-lg p-4">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h3 className="text-lg font-semibold text-gray-900">
-                            Section {index + 1}: {section.title}
-                          </h3>
-                          {section.description && (
-                            <p className="text-gray-600 mt-1">{section.description}</p>
-                          )}
-                        </div>
-                        <div className="text-sm text-gray-500">
-                          {section.total_videos} videos • {section.duration}
+              <div className="card-body p-0">
+                <div className="accordion" id="courseAccordion">
+                  {course.sections && course.sections.map((section, index) => (
+                    <div key={section.id} className="accordion-item">
+                      <h2 className="accordion-header">
+                        <button 
+                          className={`accordion-button ${activeSection === section.id ? '' : 'collapsed'}`}
+                          type="button"
+                          data-bs-toggle="collapse"
+                          data-bs-target={`#section-${section.id}`}
+                          onClick={() => setActiveSection(activeSection === section.id ? null : section.id)}
+                        >
+                          <div className="d-flex justify-content-between align-items-center w-100 me-3">
+                            <span>
+                              <i className="fas fa-play-circle text-primary me-2"></i>
+                              {section.title}
+                            </span>
+                            <small className="text-muted">
+                              {section.videos?.length || 0} ویدیو
+                            </small>
+                          </div>
+                        </button>
+                      </h2>
+                      <div 
+                        id={`section-${section.id}`}
+                        className={`accordion-collapse collapse ${activeSection === section.id ? 'show' : ''}`}
+                        data-bs-parent="#courseAccordion"
+                      >
+                        <div className="accordion-body">
+                          <p className="text-muted mb-3">{section.description}</p>
+                          <div className="list-group list-group-flush">
+                            {section.videos && section.videos.map((video) => (
+                              <div key={video.id} className="list-group-item d-flex justify-content-between align-items-center">
+                                <div className="d-flex align-items-center">
+                                  <i className={`fas ${video.is_preview ? 'fa-eye text-success' : 'fa-lock text-muted'} me-3`}></i>
+                                  <div>
+                                    <h6 className="mb-1">{video.title}</h6>
+                                    <small className="text-muted">{video.description}</small>
+                                  </div>
+                                </div>
+                                <div className="d-flex align-items-center">
+                                  <small className="text-muted me-3">
+                                    {formatDuration(video.duration)}
+                                  </small>
+                                  {video.is_preview ? (
+                                    <span className="badge bg-success">پیش‌نمایش</span>
+                                  ) : (
+                                    <span className="badge bg-secondary">قفل</span>
+                                  )}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
                         </div>
                       </div>
                     </div>
                   ))}
                 </div>
               </div>
-            )}
+            </div>
 
             {/* Reviews */}
             {course.reviews && course.reviews.length > 0 && (
-              <div className="mb-8">
-                <h2 className="text-2xl font-bold text-gray-900 mb-4">
-                  Reviews ({course.review_count})
-                </h2>
-                <div className="space-y-4">
-                  {course.reviews.slice(0, 5).map((review) => (
-                    <div key={review.id} className="border border-gray-200 rounded-lg p-4">
-                      <div className="flex items-center justify-between mb-2">
-                        <h4 className="font-semibold text-gray-900">{review.user_name}</h4>
-                        <div className="flex items-center">
-                          {[...Array(5)].map((_, i) => (
-                            <span
-                              key={i}
-                              className={`text-sm ${
-                                i < review.rating ? 'text-yellow-400' : 'text-gray-300'
-                              }`}
-                            >
-                              ★
-                            </span>
-                          ))}
+              <div className="card border-0 shadow-sm" data-aos="fade-up" data-aos-delay="300">
+                <div className="card-header bg-transparent border-0">
+                  <h5 className="mb-0">
+                    <i className="fas fa-star text-warning me-2"></i>
+                    نظرات دانشجویان ({course.total_reviews})
+                  </h5>
+                </div>
+                <div className="card-body">
+                  {course.reviews.slice(0, showAllReviews ? course.reviews.length : 3).map((review) => (
+                    <div key={review.id} className="border-bottom pb-3 mb-3">
+                      <div className="d-flex justify-content-between align-items-start mb-2">
+                        <div>
+                          <h6 className="mb-1">
+                            {review.user.first_name} {review.user.last_name}
+                          </h6>
+                          <div className="rating">
+                            {[...Array(5)].map((_, i) => (
+                              <i 
+                                key={i} 
+                                className={`fas fa-star ${i < review.rating ? 'text-warning' : 'text-muted'}`}
+                              ></i>
+                            ))}
+                          </div>
                         </div>
+                        <small className="text-muted">
+                          {new Date(review.created_at).toLocaleDateString('fa-IR')}
+                        </small>
                       </div>
-                      <p className="text-gray-600">{review.comment}</p>
+                      <p className="mb-0">{review.comment}</p>
                     </div>
                   ))}
+                  
+                  {course.reviews.length > 3 && (
+                    <div className="text-center">
+                      <button 
+                        className="btn btn-outline-primary"
+                        onClick={() => setShowAllReviews(!showAllReviews)}
+                      >
+                        {showAllReviews ? 'نمایش کمتر' : `مشاهده ${course.reviews.length - 3} نظر دیگر`}
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
           </div>
 
           {/* Sidebar */}
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg shadow-md p-6 sticky top-8">
-              <div className="text-center mb-6">
-                <div className="text-3xl font-bold text-gray-900 mb-2">
-                  {course.is_free ? 'Free' : `$${course.effective_price}`}
-                </div>
-                {!course.is_free && course.original_amount && course.original_amount !== course.effective_price && (
-                  <div className="text-lg text-gray-500 line-through">
-                    ${course.original_amount}
-                  </div>
-                )}
-              </div>
-
-              <div className="space-y-4 mb-6">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-600">Instructor</span>
-                  <span className="font-medium">{course.instructor_name}</span>
-                </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-600">Duration</span>
-                  <span className="font-medium">{course.duration_hours} hours</span>
-                </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-600">Videos</span>
-                  <span className="font-medium">{course.total_videos}</span>
-                </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-600">Sections</span>
-                  <span className="font-medium">{course.total_sections}</span>
-                </div>
-                {course.average_rating && (
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-600">Rating</span>
-                    <div className="flex items-center">
-                      <span className="text-yellow-400 mr-1">★</span>
-                      <span className="font-medium">{course.average_rating}</span>
+          <div className="col-lg-4">
+            {/* Purchase Card */}
+            <div className="card border-0 shadow-sm sticky-top" style={{ top: '100px' }} data-aos="fade-left">
+              <div className="card-body p-4">
+                <div className="text-center mb-4">
+                  {course.is_free ? (
+                    <h3 className="text-success mb-0">رایگان</h3>
+                  ) : (
+                    <div>
+                      {course.discount_price ? (
+                        <>
+                          <span className="text-muted text-decoration-line-through d-block">
+                            {(course.price || 0).toLocaleString()} تومان
+                          </span>
+                          <h3 className="text-success mb-0">
+                            {course.discount_price.toLocaleString()} تومان
+                          </h3>
+                          <span className="badge bg-danger mt-2">تخفیف ویژه</span>
+                        </>
+                      ) : (
+                        <h3 className="text-primary mb-0">
+                          {(course.price || 0).toLocaleString()} تومان
+                        </h3>
+                      )}
                     </div>
-                  </div>
-                )}
-              </div>
+                  )}
+                </div>
 
-              <div className="space-y-3">
-                {course.is_enrolled ? (
-                  <Link
-                    href={`/courses/${course.slug}/sections/1`}
-                    className="w-full bg-green-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-green-700 transition-colors text-center block"
-                  >
-                    Continue Learning
-                  </Link>
-                ) : (
-                  <button className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors">
-                    Enroll Now
-                  </button>
-                )}
-                
-                <button className="w-full border border-gray-300 text-gray-700 py-3 px-4 rounded-lg font-medium hover:bg-gray-50 transition-colors">
-                  Add to Cart
-                </button>
-              </div>
+                <div className="d-grid gap-2 mb-4">
+                  {course.is_free ? (
+                    <button className="btn btn-success btn-lg">
+                      <i className="fas fa-play me-2"></i>
+                      شروع دوره رایگان
+                    </button>
+                  ) : (
+                    <>
+                      <button 
+                        className="btn btn-primary btn-lg"
+                        onClick={handleAddToCart}
+                      >
+                        <i className="fas fa-cart-plus me-2"></i>
+                        افزودن به سبد خرید
+                      </button>
+                      <button className="btn btn-outline-primary">
+                        <i className="fas fa-heart me-2"></i>
+                        افزودن به علاقه‌مندی‌ها
+                      </button>
+                    </>
+                  )}
+                </div>
 
-              <div className="mt-6 pt-6 border-t border-gray-200">
-                <h3 className="text-sm font-medium text-gray-900 mb-3">Share this course</h3>
-                <div className="flex space-x-2">
-                  <button className="flex-1 bg-blue-600 text-white py-2 px-3 rounded text-sm hover:bg-blue-700 transition-colors">
-                    Facebook
-                  </button>
-                  <button className="flex-1 bg-blue-400 text-white py-2 px-3 rounded text-sm hover:bg-blue-500 transition-colors">
-                    Twitter
-                  </button>
+                <div className="border-top pt-3">
+                  <h6 className="mb-3">این دوره شامل:</h6>
+                  <ul className="list-unstyled">
+                    <li className="mb-2">
+                      <i className="fas fa-check text-success me-2"></i>
+                      {course.total_videos} ویدیو آموزشی
+                    </li>
+                    <li className="mb-2">
+                      <i className="fas fa-check text-success me-2"></i>
+                      {course.duration_hours} ساعت محتوا
+                    </li>
+                    <li className="mb-2">
+                      <i className="fas fa-check text-success me-2"></i>
+                      دسترسی مادام‌العمر
+                    </li>
+                    <li className="mb-2">
+                      <i className="fas fa-check text-success me-2"></i>
+                      گواهی تکمیل دوره
+                    </li>
+                    <li className="mb-2">
+                      <i className="fas fa-check text-success me-2"></i>
+                      پشتیبانی آنلاین
+                    </li>
+                  </ul>
                 </div>
               </div>
             </div>
+
+            {/* Instructor Card */}
+            {course.instructor && (
+              <div className="card border-0 shadow-sm mt-4" data-aos="fade-left" data-aos-delay="100">
+                <div className="card-header bg-transparent border-0">
+                  <h6 className="mb-0">
+                    <i className="fas fa-chalkboard-teacher text-primary me-2"></i>
+                    مدرس دوره
+                  </h6>
+                </div>
+                <div className="card-body text-center">
+                  {course.instructor.avatar ? (
+                    <img 
+                      src={course.instructor.avatar} 
+                      className="rounded-circle mb-3" 
+                      width="80" 
+                      height="80"
+                      alt={course.instructor.name}
+                      style={{ objectFit: 'cover' }}
+                    />
+                  ) : (
+                    <div 
+                      className="bg-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
+                      style={{ width: '80px', height: '80px' }}
+                    >
+                      <i className="fas fa-user fa-2x text-white"></i>
+                    </div>
+                  )}
+                  <h6 className="mb-2">{course.instructor.name}</h6>
+                  <p className="text-muted small">{course.instructor.bio}</p>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
-    </Layout>
+    </div>
   );
 }

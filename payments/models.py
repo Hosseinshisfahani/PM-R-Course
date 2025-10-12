@@ -45,6 +45,8 @@ class Purchase(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     
     class Meta:
+        verbose_name = "خرید"
+        verbose_name_plural = "خریدها"
         ordering = ['-created_at']
     
     def __str__(self):
@@ -84,6 +86,8 @@ class Enrollment(models.Model):
     enrolled_at = models.DateTimeField(auto_now_add=True)
     
     class Meta:
+        verbose_name = "ثبت‌نام"
+        verbose_name_plural = "ثبت‌نام‌ها"
         unique_together = [
             ['user', 'course'],
             ['user', 'section'],
@@ -102,6 +106,8 @@ class VideoProgress(models.Model):
     last_watched_at = models.DateTimeField(auto_now=True)
     
     class Meta:
+        verbose_name = "پیشرفت ویدیو"
+        verbose_name_plural = "پیشرفت ویدیوها"
         unique_together = ['user', 'video']
     
     def __str__(self):
@@ -118,6 +124,10 @@ class Cart(models.Model):
     referral_code = models.ForeignKey('ReferralCode', on_delete=models.SET_NULL, blank=True, null=True, related_name='carts')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = "سبد خرید"
+        verbose_name_plural = "سبدهای خرید"
     
     def __str__(self):
         return f"{self.user.username}'s Cart"
@@ -175,6 +185,8 @@ class CartItem(models.Model):
     added_at = models.DateTimeField(auto_now_add=True)
     
     class Meta:
+        verbose_name = "آیتم سبد خرید"
+        verbose_name_plural = "آیتم‌های سبد خرید"
         unique_together = [
             ['cart', 'course'],
             ['cart', 'section'],
@@ -204,6 +216,8 @@ class ReferralCode(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     
     class Meta:
+        verbose_name = "کد معرف"
+        verbose_name_plural = "کدهای معرف"
         ordering = ['-created_at']
     
     def __str__(self):
@@ -244,6 +258,8 @@ class ReferralUsage(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     
     class Meta:
+        verbose_name = "استفاده از کد معرف"
+        verbose_name_plural = "استفاده‌های کد معرف"
         ordering = ['-created_at']
         unique_together = ['referral_code', 'purchase']
     
@@ -264,6 +280,8 @@ class MarketerCommission(models.Model):
     paid_at = models.DateTimeField(null=True, blank=True)
     
     class Meta:
+        verbose_name = "کمیسیون بازاریاب"
+        verbose_name_plural = "کمیسیون‌های بازاریاب"
         ordering = ['-created_at']
     
     def __str__(self):
@@ -325,6 +343,8 @@ class MarketerRegistrationRequest(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     
     class Meta:
+        verbose_name = "درخواست عضویت بازاریاب"
+        verbose_name_plural = "درخواست‌های عضویت بازاریاب"
         ordering = ['-created_at']
         unique_together = ['user']  # One request per user
     

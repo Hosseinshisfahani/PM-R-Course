@@ -1,0 +1,345 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}پیوستن به تیم فروشندگان - آکادمی آقای استخوان{% endblock %}
+
+{% block extra_css %}
+<style>
+    .join-container {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 2rem 0;
+    }
+    
+    .join-header {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+    
+    .join-title {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: var(--text-dark);
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+    }
+    
+    .join-subtitle {
+        color: var(--text-light);
+        font-size: 1.1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .benefits-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .benefit-card {
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 15px;
+        padding: 1.5rem;
+        text-align: center;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s ease;
+    }
+    
+    .benefit-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+    }
+    
+    .benefit-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        margin: 0 auto 1rem;
+    }
+    
+    .benefit-icon.commission {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+    }
+    
+    .benefit-icon.flexible {
+        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+        color: white;
+    }
+    
+    .benefit-icon.support {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        color: white;
+    }
+    
+    .benefit-icon.growth {
+        background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+        color: white;
+    }
+    
+    .join-content {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    }
+    
+    .form-section {
+        margin-bottom: 2rem;
+    }
+    
+    .card {
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        margin-bottom: 1.5rem;
+    }
+    
+    .card-header {
+        border-radius: 15px 15px 0 0 !important;
+        border-bottom: none;
+        padding: 1rem 1.5rem;
+    }
+    
+    .card-body {
+        padding: 1.5rem;
+    }
+    
+    .form-control, .form-select {
+        border-radius: 10px;
+        border: 2px solid #e5e7eb;
+        padding: 12px 16px;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    .btn-submit {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        border: none;
+        color: white;
+        padding: 15px 30px;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 1.1rem;
+        width: 100%;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+    }
+    
+    .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+        color: white;
+    }
+    
+    .form-check-input:checked {
+        background-color: #10b981;
+        border-color: #10b981;
+    }
+    
+    .alert {
+        border-radius: 15px;
+        border: none;
+    }
+    
+    .stats-section {
+        background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+        border-radius: 15px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-top: 1.5rem;
+    }
+    
+    .stat-item {
+        background: white;
+        border-radius: 10px;
+        padding: 1rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+    
+    .stat-value {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: var(--primary-color);
+    }
+    
+    .stat-label {
+        color: var(--text-light);
+        font-size: 0.9rem;
+        margin-top: 0.25rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="join-container">
+    <div class="container">
+        <!-- Header -->
+        <div class="join-header" data-aos="fade-down">
+            <h1 class="join-title">
+                <i class="fas fa-handshake"></i>
+                به تیم فروشندگان ما بپیوندید
+            </h1>
+            <p class="join-subtitle">فرصت کسب درآمد از فروش دوره‌های باکیفیت</p>
+        </div>
+        
+        <!-- Benefits Section -->
+        <div class="benefits-grid" data-aos="fade-up">
+            <div class="benefit-card">
+                <div class="benefit-icon commission">
+                    <i class="fas fa-percentage"></i>
+                </div>
+                <h5>کمیسیون ۱۰٪</h5>
+                <p class="text-muted">از هر فروش موفق</p>
+            </div>
+            
+            <div class="benefit-card">
+                <div class="benefit-icon flexible">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <h5>ساعات کاری انعطاف‌پذیر</h5>
+                <p class="text-muted">هر زمان که بخواهید کار کنید</p>
+            </div>
+            
+            <div class="benefit-card">
+                <div class="benefit-icon support">
+                    <i class="fas fa-headset"></i>
+                </div>
+                <h5>پشتیبانی کامل</h5>
+                <p class="text-muted">تیم پشتیبانی همیشه در کنار شما</p>
+            </div>
+            
+            <div class="benefit-card">
+                <div class="benefit-icon growth">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <h5>رشد و پیشرفت</h5>
+                <p class="text-muted">فرصت‌های رشد و توسعه مهارت</p>
+            </div>
+        </div>
+        
+        <!-- Stats Section -->
+        <div class="stats-section" data-aos="fade-up" data-aos-delay="100">
+            <h4 class="text-primary mb-3">
+                <i class="fas fa-trophy me-2"></i>
+                آمار تیم فروشندگان
+            </h4>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-value">۱۵۰+</div>
+                    <div class="stat-label">فروشنده فعال</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">۵۰۰+</div>
+                    <div class="stat-label">فروش ماهانه</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">۹۵٪</div>
+                    <div class="stat-label">رضایت مشتریان</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">۲۴/۷</div>
+                    <div class="stat-label">پشتیبانی</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Registration Form -->
+        <div class="join-content" data-aos="fade-up" data-aos-delay="200">
+            {% crispy form %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add animation to benefit cards
+        const benefitCards = document.querySelectorAll('.benefit-card');
+        benefitCards.forEach((card, index) => {
+            card.style.animationDelay = `${index * 0.1}s`;
+        });
+        
+        // Add hover effects to benefit cards
+        benefitCards.forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-5px)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        });
+        
+        // Form validation
+        const form = document.querySelector('form');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                const agreeCheckbox = document.querySelector('input[name="agree_to_terms"]');
+                if (!agreeCheckbox.checked) {
+                    e.preventDefault();
+                    alert('لطفاً با شرایط و قوانین موافقت کنید.');
+                    return false;
+                }
+                
+                // Show loading state
+                const submitBtn = document.querySelector('button[type="submit"]');
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>در حال ارسال...';
+                submitBtn.disabled = true;
+            });
+        }
+        
+        // Add real-time character count for textareas
+        const textareas = document.querySelectorAll('textarea');
+        textareas.forEach(textarea => {
+            const maxLength = textarea.getAttribute('maxlength');
+            if (maxLength) {
+                const counter = document.createElement('small');
+                counter.className = 'text-muted';
+                counter.style.float = 'left';
+                textarea.parentNode.appendChild(counter);
+                
+                function updateCounter() {
+                    const remaining = maxLength - textarea.value.length;
+                    counter.textContent = `${remaining} کاراکتر باقی مانده`;
+                    if (remaining < 50) {
+                        counter.className = 'text-warning';
+                    } else {
+                        counter.className = 'text-muted';
+                    }
+                }
+                
+                textarea.addEventListener('input', updateCounter);
+                updateCounter();
+            }
+        });
+    });
+</script>
+{% endblock %}

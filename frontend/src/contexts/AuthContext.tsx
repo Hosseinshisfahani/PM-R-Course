@@ -24,7 +24,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const response = await authApi.getProfile();
       setUser(response);
-    } catch (error) {
+    } catch (error: any) {
+      // 403 error is expected when user is not logged in - suppress console error
+      if (error.status !== 403) {
+        console.error('Auth check error:', error);
+      }
       setUser(null);
     } finally {
       setLoading(false);
@@ -59,12 +63,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const refreshUser = async () => {
+    try {
+      const response = await authApi.getProfile();
+      setUser(response);
+    } catch (error: any) {
+      if (error.status !== 403) {
+        console.error('Refresh user error:', error);
+      }
+      setUser(null);
+    }
+  };
+
   const value: AuthContextType = {
     user,
     loading,
     login,
     logout,
     signup,
+    refreshUser,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

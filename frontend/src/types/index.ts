@@ -208,6 +208,7 @@ export interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   signup: (data: SignupData) => Promise<void>;
+  refreshUser: () => Promise<void>;
 }
 
 export interface SignupData {

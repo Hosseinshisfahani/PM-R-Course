@@ -1,19 +1,39 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
-import { cartApi, referralApi } from '@/lib/api';
-import { Cart, ReferralValidation } from '@/types';
-import Layout from '@/components/Layout';
+
+interface CartItem {
+  id: number;
+  course: {
+    id: number;
+    title: string;
+    slug: string;
+    price: number;
+    discount_price?: number;
+    thumbnail?: string;
+  };
+  quantity: number;
+  added_at: string;
+}
+
+interface Cart {
+  id: number;
+  items: CartItem[];
+  subtotal: number;
+  total: number;
+  referral_discount?: number;
+  referral_code?: string;
+}
 
 export default function CartPage() {
-  const { user } = useAuth();
   const [cart, setCart] = useState<Cart | null>(null);
   const [loading, setLoading] = useState(true);
   const [referralCode, setReferralCode] = useState('');
-  const [referralError, setReferralError] = useState('');
-  const [referralSuccess, setReferralSuccess] = useState('');
+  const [applyingReferral, setApplyingReferral] = useState(false);
+  const [removingItem, setRemovingItem] = useState<number | null>(null);
+  const { user } = useAuth();
 
   useEffect(() => {
     if (user) {
@@ -25,10 +45,19 @@ export default function CartPage() {
 
   const fetchCart = async () => {
     try {
-      const cartData = await cartApi.getCart();
-      setCart(cartData);
+      setLoading(true);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/payments/cart/`, {
+        credentials: 'include',
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setCart(data);
+        if (data.referral_code) {
+          setReferralCode(data.referral_code);
+        }
+      }
     } catch (error) {
-      console.error('Failed to fetch cart:', error);
+      console.error('Error fetching cart:', error);
     } finally {
       setLoading(false);
     }
@@ -36,231 +65,346 @@ export default function CartPage() {
 
   const removeFromCart = async (itemId: number) => {
     try {
-      const updatedCart = await cartApi.removeFromCart(itemId);
-      setCart(updatedCart);
+      setRemovingItem(itemId);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/payments/cart/items/${itemId}/`, {
+        method: 'DELETE',
+        headers: {
+          'X-CSRFToken': getCsrfToken(),
+        },
+        credentials: 'include',
+      });
+
+      if (response.ok) {
+        await fetchCart(); // Refresh cart
+      } else {
+        console.error('Failed to remove item from cart');
+      }
     } catch (error) {
-      console.error('Failed to remove item:', error);
+      console.error('Error removing item from cart:', error);
+    } finally {
+      setRemovingItem(null);
     }
   };
 
-  const applyReferralCode = async () => {
+  const applyReferralCode = async (e: React.FormEvent) => {
+    e.preventDefault();
     if (!referralCode.trim()) return;
 
     try {
-      setReferralError('');
-      setReferralSuccess('');
+      setApplyingReferral(true);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/payments/referral/apply/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCsrfToken(),
+        },
+        credentials: 'include',
+        body: JSON.stringify({ code: referralCode }),
+      });
 
-      // First validate the code
-      const validation = await referralApi.validateCode(referralCode);
-      
-      if (!validation.valid) {
-        setReferralError(validation.reason || 'Invalid referral code');
-        return;
+      if (response.ok) {
+        await fetchCart(); // Refresh cart
+      } else {
+        const error = await response.json();
+        alert(error.message || 'خطا در اعمال کد معرفی');
       }
-
-      // Apply the code
-      const result = await referralApi.applyCode(referralCode);
-      setCart(result.cart);
-      setReferralSuccess(result.message);
-      setReferralCode('');
-    } catch (error: any) {
-      setReferralError(error.message || 'Failed to apply referral code');
+    } catch (error) {
+      console.error('Error applying referral code:', error);
+      alert('خطا در اعمال کد معرفی');
+    } finally {
+      setApplyingReferral(false);
     }
   };
 
   const removeReferralCode = async () => {
     try {
-      const result = await referralApi.removeCode();
-      setCart(result.cart);
-      setReferralSuccess('Referral code removed');
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/payments/referral/apply/`, {
+        method: 'DELETE',
+        headers: {
+          'X-CSRFToken': getCsrfToken(),
+        },
+        credentials: 'include',
+      });
+
+      if (response.ok) {
+        await fetchCart(); // Refresh cart
+        setReferralCode('');
+      }
     } catch (error) {
-      console.error('Failed to remove referral code:', error);
+      console.error('Error removing referral code:', error);
     }
+  };
+
+  const getCsrfToken = () => {
+    const cookies = document.cookie.split(';');
+    const csrfCookie = cookies.find(cookie => cookie.trim().startsWith('csrftoken='));
+    return csrfCookie ? csrfCookie.split('=')[1] : '';
   };
 
   if (!user) {
     return (
-      <Layout>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold text-gray-900 mb-4">Please log in to view your cart</h1>
-            <Link
-              href="/login"
-              className="bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors"
-            >
-              Login
-            </Link>
-          </div>
+      <div className="container py-5">
+        <div className="text-center">
+          <i className="fas fa-shopping-cart fa-4x text-muted mb-3"></i>
+          <h4 className="text-muted">لطفاً وارد شوید</h4>
+          <p className="text-muted">برای مشاهده سبد خرید خود باید وارد حساب کاربری شوید.</p>
+          <Link href="/login" className="btn btn-primary">
+            <i className="fas fa-sign-in-alt me-2"></i>
+            ورود
+          </Link>
         </div>
-      </Layout>
+      </div>
     );
   }
 
   if (loading) {
     return (
-      <Layout>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="text-center">Loading...</div>
+      <div className="container py-5">
+        <div className="text-center">
+          <div className="spinner-border text-primary" role="status">
+            <span className="visually-hidden">در حال بارگذاری...</span>
+          </div>
+          <p className="mt-3">در حال بارگذاری سبد خرید...</p>
         </div>
-      </Layout>
+      </div>
+    );
+  }
+
+  if (!cart || cart.items.length === 0) {
+    return (
+      <div className="container py-5">
+        <div className="text-center">
+          <i className="fas fa-shopping-cart fa-4x text-muted mb-3"></i>
+          <h4 className="text-muted">سبد خرید شما خالی است</h4>
+          <p className="text-muted">دوره‌های مورد نظر خود را به سبد خرید اضافه کنید.</p>
+          <Link href="/courses" className="btn btn-primary">
+            <i className="fas fa-search me-2"></i>
+            مشاهده دوره‌ها
+          </Link>
+        </div>
+      </div>
     );
   }
 
   return (
-    <Layout>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">Shopping Cart</h1>
+    <div className="py-5">
+      <div className="container">
+        {/* Header */}
+        <div className="row mb-4">
+          <div className="col-12">
+            <h1 className="h3 mb-0">
+              <i className="fas fa-shopping-cart text-primary me-2"></i>
+              سبد خرید
+            </h1>
+            <p className="text-muted">دوره‌های انتخاب شده خود را بررسی کنید</p>
+          </div>
+        </div>
 
-        {cart && cart.items.length > 0 ? (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Cart Items */}
-            <div className="lg:col-span-2">
-              <div className="space-y-4">
+        <div className="row">
+          {/* Cart Items */}
+          <div className="col-lg-8">
+            <div className="card border-0 shadow-sm" data-aos="fade-up">
+              <div className="card-header bg-transparent border-0">
+                <h5 className="mb-0">
+                  <i className="fas fa-list text-primary me-2"></i>
+                  دوره‌های انتخاب شده ({cart.items.length})
+                </h5>
+              </div>
+              <div className="card-body p-0">
                 {cart.items.map((item) => (
-                  <div key={item.id} className="bg-white rounded-lg shadow-sm border p-6">
-                    <div className="flex items-start space-x-4">
-                      {item.course?.thumbnail && (
-                        <img
-                          src={item.course.thumbnail}
-                          alt={item.item_title}
-                          className="w-20 h-20 object-cover rounded-lg"
-                        />
-                      )}
-                      <div className="flex-1">
-                        <h3 className="text-lg font-semibold text-gray-900">
-                          {item.item_title}
-                        </h3>
-                        {item.course && (
-                          <p className="text-sm text-gray-600 mt-1">
-                            {item.course.category_name} • {item.course.difficulty}
-                          </p>
+                  <div key={item.id} className="border-bottom p-4">
+                    <div className="row align-items-center">
+                      <div className="col-md-2">
+                        {item.course.thumbnail ? (
+                          <img 
+                            src={item.course.thumbnail} 
+                            className="img-fluid rounded" 
+                            alt={item.course.title}
+                            style={{ width: '100%', height: '80px', objectFit: 'cover' }}
+                          />
+                        ) : (
+                          <img 
+                            src="/static/images/courses_background_medical.jpg" 
+                            className="img-fluid rounded" 
+                            alt={item.course.title}
+                            style={{ width: '100%', height: '80px', objectFit: 'cover' }}
+                          />
                         )}
-                        <div className="flex items-center justify-between mt-4">
-                          <span className="text-xl font-bold text-gray-900">
-                            ${item.item_price}
-                          </span>
-                          <button
-                            onClick={() => removeFromCart(item.id)}
-                            className="text-red-600 hover:text-red-800 font-medium"
+                      </div>
+                      <div className="col-md-6">
+                        <h6 className="mb-1">
+                          <Link 
+                            href={`/courses/${item.course.slug}`} 
+                            className="text-decoration-none text-dark"
                           >
-                            Remove
-                          </button>
+                            {item.course.title}
+                          </Link>
+                        </h6>
+                        <small className="text-muted">
+                          اضافه شده در: {new Date(item.added_at).toLocaleDateString('fa-IR')}
+                        </small>
+                      </div>
+                      <div className="col-md-2 text-center">
+                        <div className="d-flex align-items-center justify-content-center">
+                          <span className="badge bg-secondary me-2">تعداد: {item.quantity}</span>
                         </div>
+                      </div>
+                      <div className="col-md-2 text-end">
+                        <div className="fw-bold text-primary">
+                          {item.course.discount_price ? (
+                            <>
+                              <div className="text-muted text-decoration-line-through small">
+                                {item.course.price.toLocaleString()} تومان
+                              </div>
+                              <div>
+                                {item.course.discount_price.toLocaleString()} تومان
+                              </div>
+                            </>
+                          ) : (
+                            <div>{item.course.price.toLocaleString()} تومان</div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="row mt-3">
+                      <div className="col-12 text-end">
+                        <button
+                          className="btn btn-outline-danger btn-sm"
+                          onClick={() => removeFromCart(item.id)}
+                          disabled={removingItem === item.id}
+                        >
+                          {removingItem === item.id ? (
+                            <>
+                              <span className="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                              در حال حذف...
+                            </>
+                          ) : (
+                            <>
+                              <i className="fas fa-trash me-1"></i>
+                              حذف از سبد خرید
+                            </>
+                          )}
+                        </button>
                       </div>
                     </div>
                   </div>
                 ))}
               </div>
             </div>
+          </div>
 
-            {/* Cart Summary */}
-            <div className="lg:col-span-1">
-              <div className="bg-white rounded-lg shadow-sm border p-6 sticky top-8">
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">Order Summary</h2>
-                
-                {/* Referral Code Section */}
-                <div className="mb-6">
-                  <h3 className="text-md font-medium text-gray-900 mb-3">Referral Code</h3>
+          {/* Order Summary */}
+          <div className="col-lg-4">
+            <div className="card border-0 shadow-sm sticky-top" style={{ top: '100px' }} data-aos="fade-left">
+              <div className="card-header bg-transparent border-0">
+                <h5 className="mb-0">
+                  <i className="fas fa-receipt text-primary me-2"></i>
+                  خلاصه سفارش
+                </h5>
+              </div>
+              <div className="card-body">
+                {/* Referral Code */}
+                <div className="mb-4">
+                  <h6 className="mb-3">
+                    <i className="fas fa-gift text-success me-2"></i>
+                    کد معرفی
+                  </h6>
                   {cart.referral_code ? (
-                    <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-                      <div className="flex items-center justify-between">
-                        <span className="text-green-800 font-medium">
-                          Applied: {cart.referral_code}
-                        </span>
+                    <div className="alert alert-success">
+                      <div className="d-flex justify-content-between align-items-center">
+                        <div>
+                          <i className="fas fa-check-circle me-2"></i>
+                          <strong>{cart.referral_code}</strong>
+                          <div className="small text-muted">
+                            تخفیف: {cart.referral_discount?.toLocaleString()} تومان
+                          </div>
+                        </div>
                         <button
+                          className="btn btn-sm btn-outline-danger"
                           onClick={removeReferralCode}
-                          className="text-green-600 hover:text-green-800 text-sm"
                         >
-                          Remove
+                          <i className="fas fa-times"></i>
                         </button>
                       </div>
                     </div>
                   ) : (
-                    <div className="space-y-3">
-                      <div className="flex space-x-2">
+                    <form onSubmit={applyReferralCode}>
+                      <div className="input-group">
                         <input
                           type="text"
+                          className="form-control"
+                          placeholder="کد معرفی خود را وارد کنید"
                           value={referralCode}
                           onChange={(e) => setReferralCode(e.target.value)}
-                          placeholder="Enter referral code"
-                          className="flex-1 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          style={{ borderRadius: '10px 0 0 10px' }}
                         />
                         <button
-                          onClick={applyReferralCode}
-                          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                          className="btn btn-success"
+                          type="submit"
+                          disabled={applyingReferral || !referralCode.trim()}
+                          style={{ borderRadius: '0 10px 10px 0' }}
                         >
-                          Apply
+                          {applyingReferral ? (
+                            <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                          ) : (
+                            <i className="fas fa-check"></i>
+                          )}
                         </button>
                       </div>
-                      {referralError && (
-                        <p className="text-red-600 text-sm">{referralError}</p>
-                      )}
-                      {referralSuccess && (
-                        <p className="text-green-600 text-sm">{referralSuccess}</p>
-                      )}
-                    </div>
+                    </form>
                   )}
                 </div>
 
                 {/* Price Breakdown */}
-                <div className="space-y-3 mb-6">
-                  <div className="flex justify-between text-gray-600">
-                    <span>Subtotal</span>
-                    <span>${cart.subtotal}</span>
+                <div className="border-top pt-3">
+                  <div className="d-flex justify-content-between mb-2">
+                    <span>جمع کل:</span>
+                    <span>{cart.subtotal.toLocaleString()} تومان</span>
                   </div>
-                  {cart.discount_amount > 0 && (
-                    <div className="flex justify-between text-green-600">
-                      <span>Referral Discount</span>
-                      <span>-${cart.discount_amount}</span>
+                  
+                  {cart.referral_discount && cart.referral_discount > 0 && (
+                    <div className="d-flex justify-content-between mb-2 text-success">
+                      <span>تخفیف کد معرفی:</span>
+                      <span>-{cart.referral_discount.toLocaleString()} تومان</span>
                     </div>
                   )}
-                  <div className="border-t border-gray-200 pt-3">
-                    <div className="flex justify-between text-lg font-semibold text-gray-900">
-                      <span>Total</span>
-                      <span>${cart.total_amount}</span>
-                    </div>
+                  
+                  <hr />
+                  <div className="d-flex justify-content-between fw-bold fs-5">
+                    <span>مبلغ نهایی:</span>
+                    <span className="text-primary">{cart.total.toLocaleString()} تومان</span>
                   </div>
                 </div>
 
                 {/* Checkout Button */}
-                <Link
-                  href="/checkout"
-                  className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors text-center block"
-                >
-                  Proceed to Checkout
-                </Link>
-
-                <div className="mt-4 text-center">
-                  <Link
-                    href="/courses"
-                    className="text-blue-600 hover:text-blue-800 font-medium"
+                <div className="d-grid mt-4">
+                  <Link 
+                    href="/checkout" 
+                    className="btn btn-primary btn-lg"
+                    style={{ 
+                      borderRadius: '50px',
+                      background: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
+                      border: 'none',
+                      fontWeight: '600'
+                    }}
                   >
-                    Continue Shopping
+                    <i className="fas fa-credit-card me-2"></i>
+                    ادامه فرآیند خرید
+                  </Link>
+                </div>
+
+                {/* Continue Shopping */}
+                <div className="text-center mt-3">
+                  <Link href="/courses" className="btn btn-outline-primary">
+                    <i className="fas fa-plus me-2"></i>
+                    افزودن دوره بیشتر
                   </Link>
                 </div>
               </div>
             </div>
           </div>
-        ) : (
-          <div className="text-center py-12">
-            <div className="text-gray-400 mb-4">
-              <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01" />
-              </svg>
-            </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Your cart is empty</h3>
-            <p className="text-gray-600 mb-4">
-              Add some courses to get started
-            </p>
-            <Link
-              href="/courses"
-              className="bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors"
-            >
-              Browse Courses
-            </Link>
-          </div>
-        )}
+        </div>
       </div>
-    </Layout>
+    </div>
   );
 }

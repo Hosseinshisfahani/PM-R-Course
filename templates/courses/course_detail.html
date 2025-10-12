@@ -1,0 +1,342 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ course.title }} - پلتفرم آموزش پزشکی{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Course Header -->
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card">
+                {% if course.thumbnail %}
+                    <img src="{{ course.thumbnail.url }}" class="card-img-top" alt="{{ course.title }}" style="height: 400px; object-fit: cover;">
+                {% else %}
+                    <img src="https://via.placeholder.com/800x400/f8f9fa/6c757d?text={{ course.title }}" 
+                         class="card-img-top" alt="{{ course.title }}" style="height: 400px; object-fit: cover;">
+                {% endif %}
+                
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <h1 class="card-title fw-bold">{{ course.title }}</h1>
+                            <p class="text-muted">{{ course.short_description }}</p>
+                        </div>
+                        <div class="text-end">
+                            <span class="badge bg-primary badge-difficulty">{{ course.get_difficulty_display }}</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Course Info -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fas fa-user me-2 text-primary"></i>
+                                <span><strong>مدرس:</strong> {{ course.instructor.get_full_name|default:course.instructor.username }}</span>
+                            </div>
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fas fa-clock me-2 text-primary"></i>
+                                <span><strong>مدت زمان:</strong> {{ course.duration_hours }} ساعت</span>
+                            </div>
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fas fa-tag me-2 text-primary"></i>
+                                <span><strong>دسته‌بندی:</strong> {{ course.category.name }}</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fas fa-play-circle me-2 text-primary"></i>
+                                <span><strong>تعداد بخش‌ها:</strong> {{ course.get_total_sections }}</span>
+                            </div>
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fas fa-video me-2 text-primary"></i>
+                                <span><strong>تعداد ویدیوها:</strong> {{ course.get_total_videos }}</span>
+                            </div>
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fas fa-star me-2 text-warning"></i>
+                                <span><strong>امتیاز:</strong> {{ avg_rating|floatformat:1 }}/5 ({{ total_reviews }} نظر)</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Course Description -->
+                    <div class="mb-4">
+                        <h4>درباره دوره</h4>
+                        <div class="course-description">
+                            {{ course.description|safe }}
+                        </div>
+                    </div>
+                    
+                    <!-- What You'll Learn -->
+                    {% if course.what_you_learn %}
+                    <div class="mb-4">
+                        <h4>چیزهایی که یاد خواهید گرفت</h4>
+                        <div class="what-you-learn">
+                            {{ course.what_you_learn|linebreaks }}
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Prerequisites -->
+                    {% if course.prerequisites %}
+                    <div class="mb-4">
+                        <h4>پیش‌نیازها</h4>
+                        <div class="prerequisites">
+                            {{ course.prerequisites|linebreaks }}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <div class="card mb-4">
+                <div class="card-body text-center">
+                    <div class="price-section mb-3">
+                        {% if course.is_free %}
+                            <span class="price-display text-success fs-3 fw-bold">رایگان</span>
+                        {% else %}
+                            {% if course.discount_price %}
+                                <div class="mb-2">
+                                    <span class="text-muted text-decoration-line-through">{{ course.price|floatformat:0 }} تومان</span>
+                                </div>
+                                <span class="price-display text-primary fs-3 fw-bold">{{ course.discount_price|floatformat:0 }} تومان</span>
+                            {% else %}
+                                <span class="price-display text-primary fs-3 fw-bold">{{ course.price|floatformat:0 }} تومان</span>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                    
+                    {% if user.is_authenticated %}
+                        {% if user_enrolled %}
+                            <div class="alert alert-success">
+                                <i class="fas fa-check-circle me-2"></i>
+                                شما در این دوره ثبت‌نام کرده‌اید
+                            </div>
+                            <a href="{% url 'courses:my_courses' %}" class="btn btn-success btn-lg w-100">
+                                <i class="fas fa-play me-2"></i>
+                                شروع یادگیری
+                            </a>
+                        {% else %}
+                            <button onclick="addToCart('course', {{ course.id }})" class="btn btn-primary btn-lg w-100 mb-2">
+                                <i class="fas fa-cart-plus me-2"></i>
+                                افزودن به سبد خرید
+                            </button>
+                            <a href="{% url 'payments:checkout' %}" class="btn btn-outline-primary btn-lg w-100">
+                                <i class="fas fa-credit-card me-2"></i>
+                                تسویه حساب
+                            </a>
+                        {% endif %}
+                    {% else %}
+                        <a href="{% url 'accounts:login' %}" class="btn btn-primary btn-lg w-100 mb-2">
+                            <i class="fas fa-sign-in-alt me-2"></i>
+                            ورود برای خرید
+                        </a>
+                        <a href="{% url 'accounts:signup' %}" class="btn btn-outline-primary btn-lg w-100">
+                            <i class="fas fa-user-plus me-2"></i>
+                            ثبت‌نام
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Course Stats -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">آمار دوره</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <div class="stat-item">
+                                <div class="fs-4 fw-bold text-primary">{{ course.get_total_sections }}</div>
+                                <div class="text-muted">بخش</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="stat-item">
+                                <div class="fs-4 fw-bold text-primary">{{ course.get_total_videos }}</div>
+                                <div class="text-muted">ویدیو</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Course Sections -->
+    {% if course.sections.exists %}
+    <div class="row mt-5">
+        <div class="col-12">
+            <h3>محتوای دوره</h3>
+            <div class="accordion" id="courseSections">
+                {% for section in course.sections.all %}
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="heading{{ section.id }}">
+                        <button class="accordion-button {% if not forloop.first %}collapsed{% endif %}" 
+                                type="button" 
+                                data-bs-toggle="collapse" 
+                                data-bs-target="#collapse{{ section.id }}" 
+                                aria-expanded="{% if forloop.first %}true{% else %}false{% endif %}" 
+                                aria-controls="collapse{{ section.id }}">
+                            <div class="d-flex justify-content-between w-100 me-3">
+                                <span>{{ section.title }}</span>
+                                <span class="badge bg-secondary">{{ section.get_total_videos }} ویدیو</span>
+                            </div>
+                        </button>
+                    </h2>
+                    <div id="collapse{{ section.id }}" 
+                         class="accordion-collapse collapse {% if forloop.first %}show{% endif %}" 
+                         aria-labelledby="heading{{ section.id }}" 
+                         data-bs-parent="#courseSections">
+                        <div class="accordion-body">
+                            {% if section.description %}
+                                <p class="text-muted mb-3">{{ section.description }}</p>
+                            {% endif %}
+                            
+                            {% if section.videos.exists %}
+                                <div class="list-group">
+                                    {% for video in section.videos.all %}
+                                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-play-circle text-primary me-3"></i>
+                                            <div>
+                                                <div class="fw-bold">{{ video.title }}</div>
+                                                {% if video.duration_seconds %}
+                                                    <small class="text-muted">{{ video.duration_seconds|floatformat:0 }} ثانیه</small>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        {% if video.is_preview %}
+                                            <span class="badge bg-success">پیش‌نمایش</span>
+                                        {% endif %}
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Reviews Section -->
+    {% if reviews %}
+    <div class="row mt-5">
+        <div class="col-12">
+            <h3>نظرات دانشجویان</h3>
+            <div class="row">
+                {% for review in reviews %}
+                <div class="col-md-6 mb-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div>
+                                    <h6 class="card-title mb-1">{{ review.user.get_full_name|default:review.user.username }}</h6>
+                                    <div class="rating">
+                                        {% for i in "12345" %}
+                                            {% if i|add:0 <= review.rating %}
+                                                <i class="fas fa-star text-warning"></i>
+                                            {% else %}
+                                                <i class="far fa-star text-warning"></i>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                <small class="text-muted">{{ review.created_at|date:"Y/m/d" }}</small>
+                            </div>
+                            <p class="card-text">{{ review.comment }}</p>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            {% if user.is_authenticated and user_enrolled %}
+            <div class="text-center mt-4">
+                <a href="{% url 'courses:add_review' course.slug %}" class="btn btn-outline-primary">
+                    <i class="fas fa-star me-2"></i>
+                    افزودن نظر
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Related Courses -->
+    {% if related_courses %}
+    <div class="row mt-5">
+        <div class="col-12">
+            <h3>دوره‌های مرتبط</h3>
+            <div class="row">
+                {% for related_course in related_courses %}
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="card course-card h-100">
+                        {% if related_course.thumbnail %}
+                            <img src="{{ related_course.thumbnail.url }}" class="card-img-top" alt="{{ related_course.title }}" style="height: 150px; object-fit: cover;">
+                        {% else %}
+                            <img src="https://via.placeholder.com/250x150/f8f9fa/6c757d?text={{ related_course.title }}" 
+                                 class="card-img-top" alt="{{ related_course.title }}" style="height: 150px; object-fit: cover;">
+                        {% endif %}
+                        
+                        <div class="card-body d-flex flex-column">
+                            <h6 class="card-title">{{ related_course.title }}</h6>
+                            <p class="card-text text-muted small">{{ related_course.short_description|truncatechars:80 }}</p>
+                            
+                            <div class="mt-auto">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    {% if related_course.is_free %}
+                                        <span class="text-success fw-bold">رایگان</span>
+                                    {% else %}
+                                        <span class="text-primary fw-bold">{{ related_course.get_effective_price|floatformat:0 }} تومان</span>
+                                    {% endif %}
+                                    <a href="{{ related_course.get_absolute_url }}" class="btn btn-sm btn-outline-primary">مشاهده</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Add to Cart Script -->
+<script>
+function addToCart(type, id) {
+    fetch('{% url "courses:add_to_cart" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({
+            type: type,
+            id: id
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+        } else {
+            alert(data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('خطا در افزودن به سبد خرید');
+    });
+}
+</script>
+{% endblock %}
+
+

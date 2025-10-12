@@ -12,7 +12,8 @@ class Category(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     
     class Meta:
-        verbose_name_plural = "Categories"
+        verbose_name = "دسته‌بندی"
+        verbose_name_plural = "دسته‌بندی‌ها"
         ordering = ['name']
     
     def __str__(self):
@@ -54,6 +55,8 @@ class Course(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     
     class Meta:
+        verbose_name = "دوره"
+        verbose_name_plural = "دوره‌ها"
         ordering = ['-created_at']
     
     def __str__(self):
@@ -85,6 +88,8 @@ class Section(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     
     class Meta:
+        verbose_name = "بخش"
+        verbose_name_plural = "بخش‌ها"
         ordering = ['order']
         unique_together = ['course', 'order']
     
@@ -115,6 +120,8 @@ class Video(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     
     class Meta:
+        verbose_name = "ویدیو"
+        verbose_name_plural = "ویدیوها"
         ordering = ['order']
         unique_together = ['section', 'order']
     
@@ -137,6 +144,10 @@ class Attachment(models.Model):
     
     created_at = models.DateTimeField(auto_now_add=True)
     
+    class Meta:
+        verbose_name = "پیوست"
+        verbose_name_plural = "پیوست‌ها"
+    
     def __str__(self):
         return f"{self.section.title} - {self.title}"
 
@@ -156,6 +167,8 @@ class Review(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     
     class Meta:
+        verbose_name = "نظر"
+        verbose_name_plural = "نظرات"
         unique_together = ['course', 'user']
         ordering = ['-created_at']
     

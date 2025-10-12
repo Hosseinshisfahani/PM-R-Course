@@ -1,216 +1,133 @@
 'use client';
 
-import React, { useState } from 'react';
-import Link from 'next/link';
-import { useAuth } from '@/contexts/AuthContext';
+import { useEffect } from 'react';
+import Navigation from './Navigation';
+import Footer from './Footer';
 
 interface LayoutProps {
   children: React.ReactNode;
 }
 
 export default function Layout({ children }: LayoutProps) {
-  const { user, logout } = useAuth();
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-
-  const handleLogout = async () => {
-    try {
-      await logout();
-    } catch (error) {
-      console.error('Logout failed:', error);
+  useEffect(() => {
+    // Initialize AOS animations
+    if (typeof window !== 'undefined') {
+      import('aos').then((AOS) => {
+        AOS.default.init({
+          duration: 800,
+          easing: 'ease-in-out',
+          once: true,
+          offset: 100
+        });
+      });
     }
-  };
+
+    // Navbar scroll effect
+    const handleScroll = () => {
+      const navbar = document.getElementById('mainNavbar');
+      if (navbar) {
+        if (window.scrollY > 50) {
+          navbar.classList.add('scrolled');
+        } else {
+          navbar.classList.remove('scrolled');
+        }
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+
+    // Smooth scrolling for anchor links
+    const anchorLinks = document.querySelectorAll('a[href^="#"]');
+    anchorLinks.forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href') || '');
+        if (target) {
+          target.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+          });
+        }
+      });
+    });
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            {/* Logo */}
-            <div className="flex-shrink-0">
-              <Link href="/" className="text-2xl font-bold text-blue-600">
-                Medical Course
-              </Link>
-            </div>
-
-            {/* Desktop Navigation */}
-            <nav className="hidden md:flex space-x-8">
-              <Link href="/" className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
-                Home
-              </Link>
-              <Link href="/courses" className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
-                Courses
-              </Link>
-              {user && (
-                <Link href="/my-courses" className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
-                  My Courses
-                </Link>
-              )}
-              {user?.is_staff_member && (
-                <Link href="/marketers" className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
-                  Marketer Dashboard
-                </Link>
-              )}
-            </nav>
-
-            {/* User Menu */}
-            <div className="hidden md:flex items-center space-x-4">
-              {user ? (
-                <div className="flex items-center space-x-4">
-                  <Link href="/cart" className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
-                    Cart
-                  </Link>
-                  <div className="relative group">
-                    <button className="flex items-center text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                      <span className="sr-only">Open user menu</span>
-                      <div className="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center">
-                        <span className="text-white text-sm font-medium">
-                          {user.first_name?.[0] || user.email[0].toUpperCase()}
-                        </span>
-                      </div>
-                    </button>
-                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
-                      <Link href="/account" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                        Profile
-                      </Link>
-                      <button
-                        onClick={handleLogout}
-                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                      >
-                        Logout
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="flex items-center space-x-4">
-                  <Link href="/login" className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
-                    Login
-                  </Link>
-                  <Link href="/signup" className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700">
-                    Sign Up
-                  </Link>
-                </div>
-              )}
-            </div>
-
-            {/* Mobile menu button */}
-            <div className="md:hidden">
-              <button
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
-                className="text-gray-700 hover:text-blue-600 focus:outline-none focus:text-blue-600"
-              >
-                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-              </button>
-            </div>
-          </div>
-
-          {/* Mobile Navigation */}
-          {isMenuOpen && (
-            <div className="md:hidden">
-              <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-                <Link href="/" className="text-gray-700 hover:text-blue-600 block px-3 py-2 rounded-md text-base font-medium">
-                  Home
-                </Link>
-                <Link href="/courses" className="text-gray-700 hover:text-blue-600 block px-3 py-2 rounded-md text-base font-medium">
-                  Courses
-                </Link>
-                {user && (
-                  <>
-                    <Link href="/my-courses" className="text-gray-700 hover:text-blue-600 block px-3 py-2 rounded-md text-base font-medium">
-                      My Courses
-                    </Link>
-                    <Link href="/cart" className="text-gray-700 hover:text-blue-600 block px-3 py-2 rounded-md text-base font-medium">
-                      Cart
-                    </Link>
-                    <Link href="/account" className="text-gray-700 hover:text-blue-600 block px-3 py-2 rounded-md text-base font-medium">
-                      Profile
-                    </Link>
-                  </>
-                )}
-                {user?.is_staff_member && (
-                  <Link href="/marketers" className="text-gray-700 hover:text-blue-600 block px-3 py-2 rounded-md text-base font-medium">
-                    Marketer Dashboard
-                  </Link>
-                )}
-                {user ? (
-                  <button
-                    onClick={handleLogout}
-                    className="text-gray-700 hover:text-blue-600 block w-full text-left px-3 py-2 rounded-md text-base font-medium"
-                  >
-                    Logout
-                  </button>
-                ) : (
-                  <>
-                    <Link href="/login" className="text-gray-700 hover:text-blue-600 block px-3 py-2 rounded-md text-base font-medium">
-                      Login
-                    </Link>
-                    <Link href="/signup" className="bg-blue-600 text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-blue-700">
-                      Sign Up
-                    </Link>
-                  </>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
-      </header>
-
+    <>
+      <Navigation />
+      
       {/* Main Content */}
-      <main className="flex-1">
+      <main>
         {children}
       </main>
 
-      {/* Footer */}
-      <footer className="bg-gray-800 text-white">
-        <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div>
-              <h3 className="text-lg font-semibold mb-4">Medical Course</h3>
-              <p className="text-gray-300">
-                Professional medical education courses for healthcare professionals.
-              </p>
+      <Footer />
+
+      {/* Join Marketers Modal */}
+      <div className="modal fade" id="joinMarketersModal" tabIndex={-1} aria-labelledby="joinMarketersModalLabel" aria-hidden="true">
+        <div className="modal-dialog modal-dialog-centered">
+          <div className="modal-content" style={{ borderRadius: '20px', border: 'none', boxShadow: '0 20px 40px rgba(0, 0, 0, 0.15)' }}>
+            <div className="modal-header" style={{ borderBottom: 'none', padding: '2rem 2rem 1rem' }}>
+              <h5 className="modal-title" id="joinMarketersModalLabel" style={{ fontWeight: '700', color: 'var(--text-dark)' }}>
+                <i className="fas fa-handshake text-success me-2"></i>
+                به تیم فروشندگان ما بپیوندید
+              </h5>
+              <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div>
-              <h4 className="text-md font-semibold mb-4">Courses</h4>
-              <ul className="space-y-2">
-                <li><Link href="/courses" className="text-gray-300 hover:text-white">All Courses</Link></li>
-                <li><Link href="/courses?featured=true" className="text-gray-300 hover:text-white">Featured</Link></li>
-              </ul>
+            <div className="modal-body" style={{ padding: '1rem 2rem 2rem' }}>
+              <div className="text-center mb-4">
+                <div className="bg-success bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style={{ width: '80px', height: '80px' }}>
+                  <i className="fas fa-coins fa-2x text-success"></i>
+                </div>
+                <h6 className="text-success mb-2">فرصت کسب درآمد</h6>
+                <p className="text-muted">با پیوستن به تیم فروشندگان ما، می‌توانید از فروش دوره‌ها کمیسیون دریافت کنید</p>
+              </div>
+              
+              <div className="row g-3 mb-4">
+                <div className="col-6">
+                  <div className="text-center p-3 bg-light rounded-3">
+                    <i className="fas fa-percentage fa-2x text-primary mb-2"></i>
+                    <h6 className="mb-1">کمیسیون ۱۰٪</h6>
+                    <small className="text-muted">از هر فروش</small>
+                  </div>
+                </div>
+                <div className="col-6">
+                  <div className="text-center p-3 bg-light rounded-3">
+                    <i className="fas fa-gift fa-2x text-warning mb-2"></i>
+                    <h6 className="mb-1">کد معرفی</h6>
+                    <small className="text-muted">برای مشتریان</small>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="alert alert-info" style={{ border: 'none', background: 'linear-gradient(135deg, #e0f2fe 0%, #b3e5fc 100%)' }}>
+                <div className="d-flex align-items-center">
+                  <i className="fas fa-info-circle text-info me-2"></i>
+                  <div>
+                    <strong>نحوه پیوستن:</strong><br />
+                    <small>برای پیوستن به تیم فروشندگان، با پشتیبانی تماس بگیرید یا درخواست خود را ارسال کنید.</small>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="d-grid gap-2">
+                <a href="mailto:support@yasery.com?subject=درخواست پیوستن به تیم فروشندگان" className="btn btn-success btn-lg" style={{ borderRadius: '50px' }}>
+                  <i className="fas fa-envelope me-2"></i>
+                  ارسال درخواست
+                </a>
+                <button type="button" className="btn btn-outline-secondary" data-bs-dismiss="modal" style={{ borderRadius: '50px' }}>
+                  <i className="fas fa-times me-2"></i>
+                  بستن
+                </button>
+              </div>
             </div>
-            <div>
-              <h4 className="text-md font-semibold mb-4">Account</h4>
-              <ul className="space-y-2">
-                {user ? (
-                  <>
-                    <li><Link href="/my-courses" className="text-gray-300 hover:text-white">My Courses</Link></li>
-                    <li><Link href="/account" className="text-gray-300 hover:text-white">Profile</Link></li>
-                  </>
-                ) : (
-                  <>
-                    <li><Link href="/login" className="text-gray-300 hover:text-white">Login</Link></li>
-                    <li><Link href="/signup" className="text-gray-300 hover:text-white">Sign Up</Link></li>
-                  </>
-                )}
-              </ul>
-            </div>
-            <div>
-              <h4 className="text-md font-semibold mb-4">Support</h4>
-              <ul className="space-y-2">
-                <li><Link href="/contact" className="text-gray-300 hover:text-white">Contact</Link></li>
-                <li><Link href="/help" className="text-gray-300 hover:text-white">Help Center</Link></li>
-              </ul>
-            </div>
-          </div>
-          <div className="mt-8 pt-8 border-t border-gray-700">
-            <p className="text-center text-gray-300">
-              © 2024 Medical Course. All rights reserved.
-            </p>
           </div>
         </div>
-      </footer>
-    </div>
+      </div>
+    </>
   );
 }

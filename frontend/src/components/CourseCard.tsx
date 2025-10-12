@@ -48,7 +48,7 @@ export default function CourseCard({ course }: CourseCardProps) {
             )}
           </div>
           <div className="text-sm text-gray-500">
-            {course.duration_hours}h • {course.total_videos} videos
+            {course.duration_hours || 0}h • {course.total_videos || 0} videos
           </div>
         </div>
         
