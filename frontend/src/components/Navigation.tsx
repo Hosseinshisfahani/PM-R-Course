@@ -3,9 +3,11 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
+import { useRole } from '@/lib/auth';
 
 export default function Navigation() {
   const { user, logout } = useAuth();
+  const { canAccessMarketerFeatures, isAdmin } = useRole();
   const [isScrolled, setIsScrolled] = useState(false);
   const [cartCount, setCartCount] = useState(0);
 
@@ -144,7 +146,7 @@ export default function Navigation() {
                         <i className="fas fa-history me-2"></i>تاریخچه خرید
                       </Link>
                     </li>
-                    {user.is_staff_member && (
+                    {canAccessMarketerFeatures && (
                       <>
                         <li><hr className="dropdown-divider" /></li>
                         <li className="px-3 py-1">
@@ -158,6 +160,19 @@ export default function Navigation() {
                         <li>
                           <Link className="dropdown-item" href="/marketers/commissions">
                             <i className="fas fa-coins me-2"></i>کمیسیون‌ها
+                          </Link>
+                        </li>
+                      </>
+                    )}
+                    {isAdmin && (
+                      <>
+                        <li><hr className="dropdown-divider" /></li>
+                        <li className="px-3 py-1">
+                          <small className="text-muted fw-bold">پنل مدیریت</small>
+                        </li>
+                        <li>
+                          <Link className="dropdown-item" href="/admin">
+                            <i className="fas fa-crown me-2"></i>پنل مدیریت
                           </Link>
                         </li>
                       </>

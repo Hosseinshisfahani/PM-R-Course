@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Course, Category, Section, Video, Review
+from .models import Course, Category, Section, Video, Review, CoursePackage
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -148,3 +148,30 @@ class CourseDetailSerializer(serializers.ModelSerializer):
         if request and request.user.is_authenticated:
             return obj.enrollments.filter(user=request.user).exists()
         return False
+
+
+class CoursePackageSerializer(serializers.ModelSerializer):
+    """Course package serializer"""
+    total_courses = serializers.SerializerMethodField()
+    total_duration = serializers.SerializerMethodField()
+    savings_amount = serializers.SerializerMethodField()
+    courses = CourseListSerializer(many=True, read_only=True)
+    
+    class Meta:
+        model = CoursePackage
+        fields = [
+            'id', 'title', 'slug', 'description', 'short_description',
+            'original_price', 'package_price', 'discount_percentage',
+            'total_courses', 'total_duration', 'savings_amount',
+            'is_published', 'is_featured', 'thumbnail', 'courses',
+            'created_at', 'updated_at'
+        ]
+    
+    def get_total_courses(self, obj):
+        return obj.get_total_courses()
+    
+    def get_total_duration(self, obj):
+        return obj.get_total_duration()
+    
+    def get_savings_amount(self, obj):
+        return obj.get_savings_amount()

@@ -4,7 +4,6 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { marketerApi } from '@/lib/api';
 import { MarketerRequest } from '@/types';
-import Layout from '@/components/Layout';
 
 export default function MarketerRequestStatusPage() {
   const { user } = useAuth();
@@ -37,7 +36,6 @@ export default function MarketerRequestStatusPage() {
 
   if (!user) {
     return (
-      <Layout>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="text-center">
             <h1 className="text-2xl font-bold text-gray-900 mb-4">Please log in to view your application status</h1>
@@ -49,23 +47,19 @@ export default function MarketerRequestStatusPage() {
             </button>
           </div>
         </div>
-      </Layout>
     );
   }
 
   if (loading) {
     return (
-      <Layout>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="text-center">Loading...</div>
         </div>
-      </Layout>
     );
   }
 
   if (error) {
     return (
-      <Layout>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="text-center">
             <h1 className="text-2xl font-bold text-gray-900 mb-4">Error</h1>
@@ -78,13 +72,11 @@ export default function MarketerRequestStatusPage() {
             </button>
           </div>
         </div>
-      </Layout>
     );
   }
 
   if (!request) {
     return (
-      <Layout>
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="text-center">
             <h1 className="text-3xl font-bold text-gray-900 mb-4">No Application Found</h1>
@@ -99,7 +91,6 @@ export default function MarketerRequestStatusPage() {
             </button>
           </div>
         </div>
-      </Layout>
     );
   }
 
@@ -142,8 +133,7 @@ export default function MarketerRequestStatusPage() {
   };
 
   return (
-    <Layout>
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-8">Application Status</h1>
 
         <div className="bg-white rounded-lg shadow-sm border p-6">
@@ -301,7 +291,6 @@ export default function MarketerRequestStatusPage() {
             </div>
           </div>
         </div>
-      </div>
-    </Layout>
+    </div>
   );
 }

@@ -1,27 +1,25 @@
 'use client';
 
 import { useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import Navigation from './Navigation';
 import Footer from './Footer';
+import AOSInitializer from './AOSInitializer';
 
 interface LayoutProps {
   children: React.ReactNode;
 }
 
 export default function Layout({ children }: LayoutProps) {
-  useEffect(() => {
-    // Initialize AOS animations
-    if (typeof window !== 'undefined') {
-      import('aos').then((AOS) => {
-        AOS.default.init({
-          duration: 800,
-          easing: 'ease-in-out',
-          once: true,
-          offset: 100
-        });
-      });
-    }
+  const pathname = usePathname();
+  const isAdminPage = pathname.startsWith('/admin');
 
+  // For admin pages, don't render the main site layout
+  if (isAdminPage) {
+    return <>{children}</>;
+  }
+
+  useEffect(() => {
     // Navbar scroll effect
     const handleScroll = () => {
       const navbar = document.getElementById('mainNavbar');
@@ -39,14 +37,18 @@ export default function Layout({ children }: LayoutProps) {
     // Smooth scrolling for anchor links
     const anchorLinks = document.querySelectorAll('a[href^="#"]');
     anchorLinks.forEach(anchor => {
-      anchor.addEventListener('click', function (e) {
+      anchor.addEventListener('click', (e: Event) => {
         e.preventDefault();
-        const target = document.querySelector(this.getAttribute('href') || '');
-        if (target) {
-          target.scrollIntoView({
-            behavior: 'smooth',
-            block: 'start'
-          });
+        const href = (anchor as HTMLAnchorElement).getAttribute('href');
+        // Only proceed if href is a valid selector (not just '#' or empty)
+        if (href && href.length > 1) {
+          const target = document.querySelector(href);
+          if (target) {
+            target.scrollIntoView({
+              behavior: 'smooth',
+              block: 'start'
+            });
+          }
         }
       });
     });
@@ -58,6 +60,7 @@ export default function Layout({ children }: LayoutProps) {
 
   return (
     <>
+      <AOSInitializer />
       <Navigation />
       
       {/* Main Content */}

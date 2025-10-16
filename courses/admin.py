@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Category, Course, Section, Video, Attachment, Review
+from .models import Category, Course, Section, Video, Attachment, Review, CoursePackage
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
@@ -78,3 +78,31 @@ class ReviewAdmin(admin.ModelAdmin):
     list_filter = ('rating', 'course', 'created_at')
     search_fields = ('course__title', 'user__username', 'comment')
     ordering = ('-created_at',)
+
+@admin.register(CoursePackage)
+class CoursePackageAdmin(admin.ModelAdmin):
+    list_display = ('title', 'package_price', 'original_price', 'discount_percentage', 'is_published', 'created_at')
+    list_filter = ('is_published', 'is_featured', 'created_at')
+    search_fields = ('title', 'description')
+    prepopulated_fields = {'slug': ('title',)}
+    filter_horizontal = ('courses',)
+    readonly_fields = ('created_at', 'updated_at')
+    
+    fieldsets = (
+        ('اطلاعات پایه', {
+            'fields': ('title', 'slug', 'description', 'short_description')
+        }),
+        ('قیمت‌گذاری', {
+            'fields': ('original_price', 'package_price', 'discount_percentage')
+        }),
+        ('دوره‌ها', {
+            'fields': ('courses',)
+        }),
+        ('تنظیمات', {
+            'fields': ('is_published', 'is_featured', 'thumbnail')
+        }),
+        ('زمان‌بندی', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )

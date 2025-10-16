@@ -26,7 +26,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(response);
     } catch (error: any) {
       // 403 error is expected when user is not logged in - suppress console error
-      if (error.status !== 403) {
+      if (error.status !== 403 && error.status !== 0) {
         console.error('Auth check error:', error);
       }
       setUser(null);

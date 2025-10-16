@@ -12,6 +12,7 @@ interface CartItem {
     slug: string;
     price: number;
     discount_price?: number;
+    effective_price: number;
     thumbnail?: string;
   };
   quantity: number;
@@ -251,18 +252,7 @@ export default function CartPage() {
                       </div>
                       <div className="col-md-2 text-end">
                         <div className="fw-bold text-primary">
-                          {item.course.discount_price ? (
-                            <>
-                              <div className="text-muted text-decoration-line-through small">
-                                {item.course.price.toLocaleString()} تومان
-                              </div>
-                              <div>
-                                {item.course.discount_price.toLocaleString()} تومان
-                              </div>
-                            </>
-                          ) : (
-                            <div>{item.course.price.toLocaleString()} تومان</div>
-                          )}
+                          <div>{Math.round(item.course.effective_price).toLocaleString()} تومان</div>
                         </div>
                       </div>
                     </div>

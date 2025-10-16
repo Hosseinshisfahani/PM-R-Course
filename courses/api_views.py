@@ -3,10 +3,10 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework import status
 from django.db.models import Q
-from .models import Course, Category, Section, Video
+from .models import Course, Category, Section, Video, CoursePackage
 from .serializers import (
     CourseListSerializer, CourseDetailSerializer, CategorySerializer,
-    SectionSerializer, VideoSerializer
+    SectionSerializer, VideoSerializer, CoursePackageSerializer
 )
 
 
@@ -161,6 +161,38 @@ class SectionDetailView(APIView):
         except (Course.DoesNotExist, Section.DoesNotExist):
             return Response(
                 {'error': 'Section not found'}, 
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+
+class PackageListView(APIView):
+    """List all published course packages"""
+    permission_classes = [AllowAny]
+    
+    def get(self, request):
+        packages = CoursePackage.objects.filter(
+            is_published=True
+        ).prefetch_related('courses').order_by('-is_featured', '-created_at')
+        
+        serializer = CoursePackageSerializer(packages, many=True)
+        return Response(serializer.data)
+
+
+class PackageDetailView(APIView):
+    """Get package detail"""
+    permission_classes = [AllowAny]
+    
+    def get(self, request, slug):
+        try:
+            package = CoursePackage.objects.get(
+                slug=slug, 
+                is_published=True
+            )
+            serializer = CoursePackageSerializer(package)
+            return Response(serializer.data)
+        except CoursePackage.DoesNotExist:
+            return Response(
+                {'error': 'Package not found'}, 
                 status=status.HTTP_404_NOT_FOUND
             )
 

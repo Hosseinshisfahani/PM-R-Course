@@ -13,6 +13,7 @@ interface Course {
   short_description: string;
   price: number;
   discount_price?: number;
+  effective_price: number;
   is_free: boolean;
   thumbnail?: string;
   preview_image?: string;
@@ -402,21 +403,9 @@ export default function CourseDetailPage() {
                     <h3 className="text-success mb-0">رایگان</h3>
                   ) : (
                     <div>
-                      {course.discount_price ? (
-                        <>
-                          <span className="text-muted text-decoration-line-through d-block">
-                            {(course.price || 0).toLocaleString()} تومان
-                          </span>
-                          <h3 className="text-success mb-0">
-                            {course.discount_price.toLocaleString()} تومان
-                          </h3>
-                          <span className="badge bg-danger mt-2">تخفیف ویژه</span>
-                        </>
-                      ) : (
-                        <h3 className="text-primary mb-0">
-                          {(course.price || 0).toLocaleString()} تومان
-                        </h3>
-                      )}
+                      <h3 className="text-primary mb-0">
+                        {Math.round(course.effective_price || 0).toLocaleString()} تومان
+                      </h3>
                     </div>
                   )}
                 </div>
@@ -428,19 +417,13 @@ export default function CourseDetailPage() {
                       شروع دوره رایگان
                     </button>
                   ) : (
-                    <>
-                      <button 
-                        className="btn btn-primary btn-lg"
-                        onClick={handleAddToCart}
-                      >
-                        <i className="fas fa-cart-plus me-2"></i>
-                        افزودن به سبد خرید
-                      </button>
-                      <button className="btn btn-outline-primary">
-                        <i className="fas fa-heart me-2"></i>
-                        افزودن به علاقه‌مندی‌ها
-                      </button>
-                    </>
+                    <button 
+                      className="btn btn-primary btn-lg"
+                      onClick={handleAddToCart}
+                    >
+                      <i className="fas fa-cart-plus me-2"></i>
+                      افزودن به سبد خرید
+                    </button>
                   )}
                 </div>
 

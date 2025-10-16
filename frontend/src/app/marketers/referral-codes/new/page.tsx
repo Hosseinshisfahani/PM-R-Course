@@ -4,7 +4,6 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { marketerApi } from '@/lib/api';
-import Layout from '@/components/Layout';
 
 export default function NewReferralCodePage() {
   const { user } = useAuth();
@@ -48,7 +47,6 @@ export default function NewReferralCodePage() {
 
   if (!user) {
     return (
-      <Layout>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="text-center">
             <h1 className="text-2xl font-bold text-gray-900 mb-4">Please log in to create referral codes</h1>
@@ -60,13 +58,11 @@ export default function NewReferralCodePage() {
             </button>
           </div>
         </div>
-      </Layout>
     );
   }
 
   if (!user.is_staff_member) {
     return (
-      <Layout>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="text-center">
             <h1 className="text-2xl font-bold text-gray-900 mb-4">Access Denied</h1>
@@ -81,7 +77,6 @@ export default function NewReferralCodePage() {
             </button>
           </div>
         </div>
-      </Layout>
     );
   }
 

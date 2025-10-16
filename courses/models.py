@@ -174,3 +174,52 @@ class Review(models.Model):
     
     def __str__(self):
         return f"{self.course.title} - {self.user.username} ({self.rating}/5)"
+
+class CoursePackage(models.Model):
+    """Course packages that bundle multiple courses with special pricing"""
+    title = models.CharField(max_length=200)
+    slug = models.SlugField(unique=True)
+    description = RichTextField()
+    short_description = models.TextField(max_length=500)
+    
+    # Package pricing
+    original_price = models.DecimalField(max_digits=10, decimal_places=2, help_text="مجموع قیمت دوره‌ها بدون تخفیف")
+    package_price = models.DecimalField(max_digits=10, decimal_places=2, help_text="قیمت پکیج با تخفیف")
+    discount_percentage = models.DecimalField(max_digits=5, decimal_places=2, help_text="درصد تخفیف")
+    
+    # Package details
+    courses = models.ManyToManyField(Course, related_name='packages')
+    is_published = models.BooleanField(default=False)
+    is_featured = models.BooleanField(default=False)
+    
+    # Media
+    thumbnail = models.ImageField(upload_to='package_thumbnails/', blank=True, null=True)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = "پکیج دوره"
+        verbose_name_plural = "پکیج‌های دوره"
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return self.title
+    
+    def get_absolute_url(self):
+        return reverse('courses:package_detail', kwargs={'slug': self.slug})
+    
+    def get_total_courses(self):
+        return self.courses.count()
+    
+    def get_total_duration(self):
+        return sum(course.duration_hours for course in self.courses.all())
+    
+    def get_savings_amount(self):
+        return self.original_price - self.package_price
+    
+    def save(self, *args, **kwargs):
+        # Calculate discount percentage if not set
+        if self.original_price and self.package_price and not self.discount_percentage:
+            self.discount_percentage = ((self.original_price - self.package_price) / self.original_price) * 100
+        super().save(*args, **kwargs)

@@ -12,6 +12,7 @@ interface Course {
   short_description: string;
   price: number;
   discount_price?: number;
+  effective_price: number;
   is_free: boolean;
   thumbnail?: string;
   difficulty: string;
@@ -25,8 +26,29 @@ interface Course {
   };
 }
 
+interface CoursePackage {
+  id: number;
+  title: string;
+  slug: string;
+  description: string;
+  short_description: string;
+  original_price: number;
+  package_price: number;
+  discount_percentage: number;
+  total_courses: number;
+  total_duration: number;
+  savings_amount: number;
+  is_published: boolean;
+  is_featured: boolean;
+  thumbnail?: string;
+  courses: Course[];
+  created_at: string;
+  updated_at: string;
+}
+
 export default function CoursesPage() {
   const [courses, setCourses] = useState<Course[]>([]);
+  const [packages, setPackages] = useState<CoursePackage[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const searchParams = useSearchParams();
@@ -35,6 +57,7 @@ export default function CoursesPage() {
     const query = searchParams.get('q') || '';
     setSearchQuery(query);
     fetchCourses(query);
+    fetchPackages();
   }, [searchParams]);
 
   const fetchCourses = async (query: string = '') => {
@@ -48,6 +71,15 @@ export default function CoursesPage() {
       console.error('Error fetching courses:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchPackages = async () => {
+    try {
+      const data = await coursesApi.getPackages();
+      setPackages(data);
+    } catch (error) {
+      console.error('Error fetching packages:', error);
     }
   };
 
@@ -195,23 +227,9 @@ export default function CoursesPage() {
                         {course.is_free ? (
                           <span className="text-success fw-bold">رایگان</span>
                         ) : (
-                          <>
-                            {course.discount_price ? (
-                              <>
-                                <span className="text-muted text-decoration-line-through me-2">
-                                  {(course.price || 0).toLocaleString()} تومان
-                                </span>
-                                <br />
-                                <span className="price-display text-success">
-                                  {course.discount_price.toLocaleString()} تومان
-                                </span>
-                              </>
-                            ) : (
-                              <span className="price-display">
-                                {(course.price || 0).toLocaleString()} تومان
-                              </span>
-                            )}
-                          </>
+                          <span className="price-display">
+                            {Math.round(course.effective_price || 0).toLocaleString()} تومان
+                          </span>
                         )}
                       </div>
                       <div className="text-end">
@@ -270,6 +288,100 @@ export default function CoursesPage() {
                 مشاهده همه دوره‌ها
               </Link>
             )}
+          </div>
+        )}
+
+        {/* Packages Section */}
+        {!searchQuery && packages.length > 0 && (
+          <div className="mt-5 package-section" data-aos="fade-up">
+            <div className="package-container">
+              <div className="text-center mb-4">
+                <h2 className="section-title">پکیج‌های ویژه</h2>
+                <p className="section-subtitle">دوره‌های کامل با تخفیف ویژه</p>
+              </div>
+              
+              <div className="row justify-content-center">
+                {packages.map((pkg, index) => (
+                  <div key={pkg.id} className="col-12 col-lg-10 col-xl-9 mb-4" data-aos="fade-up" data-aos-delay={index * 100}>
+                  <div className="package-card h-100">
+                    <div className="package-header">
+                      <div className="package-badge">
+                        <i className="fas fa-gift me-2"></i>
+                        پکیج ویژه
+                      </div>
+                      <div className="package-discount">
+                        {pkg.discount_percentage}% تخفیف
+                      </div>
+                    </div>
+                    
+                    <div className="package-content">
+                      <h3 className="package-title">{pkg.title}</h3>
+                      <p className="package-description">{pkg.short_description}</p>
+                      
+                      <div className="package-courses">
+                        <h6 className="mb-3">
+                          <i className="fas fa-book me-2"></i>
+                          شامل {pkg.total_courses} دوره:
+                        </h6>
+                        <ul className="package-course-list">
+                          {pkg.courses.map((course) => (
+                            <li key={course.id} className="d-flex align-items-center">
+                              <i className="fas fa-check-circle text-success me-2"></i>
+                              <span>{course.title}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                      
+                      <div className="package-stats">
+                        <div className="row text-center">
+                          <div className="col-4">
+                            <div className="stat-item">
+                              <div className="stat-number">{pkg.total_courses}</div>
+                              <div className="stat-label">دوره</div>
+                            </div>
+                          </div>
+                          <div className="col-4">
+                            <div className="stat-item">
+                              <div className="stat-number">{pkg.total_duration}</div>
+                              <div className="stat-label">ساعت</div>
+                            </div>
+                          </div>
+                          <div className="col-4">
+                            <div className="stat-item">
+                              <div className="stat-number">{Math.round(pkg.savings_amount).toLocaleString()}</div>
+                              <div className="stat-label">صرفه‌جویی</div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="package-pricing">
+                        <div className="price-row">
+                          <div className="original-price">
+                            <span className="text-muted text-decoration-line-through">
+                              {Math.round(pkg.original_price).toLocaleString()} تومان
+                            </span>
+                          </div>
+                          <div className="package-price">
+                            <span className="price-amount">{Math.round(pkg.package_price).toLocaleString()}</span>
+                            <span className="price-currency">تومان</span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="package-actions">
+                        <Link href={`/packages/${pkg.slug}`} className="btn btn-primary btn-lg w-100">
+                          <i className="fas fa-shopping-cart me-2"></i>
+                          خرید پکیج
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+              </div>
+            </div>
           </div>
         )}
 

@@ -4,7 +4,6 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { marketerApi } from '@/lib/api';
 import { MarketerCommissions } from '@/types';
-import Layout from '@/components/Layout';
 
 export default function MarketerCommissionsPage() {
   const { user } = useAuth();
@@ -33,56 +32,49 @@ export default function MarketerCommissionsPage() {
 
   if (!user) {
     return (
-      <Layout>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold text-gray-900 mb-4">Please log in to view your commissions</h1>
-            <button
-              onClick={() => window.location.href = '/login'}
-              className="bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors"
-            >
-              Login
-            </button>
-          </div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Please log in to view your commissions</h1>
+          <button
+            onClick={() => window.location.href = '/login'}
+            className="bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors"
+          >
+            Login
+          </button>
         </div>
-      </Layout>
+      </div>
     );
   }
 
   if (!user.is_staff_member) {
     return (
-      <Layout>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold text-gray-900 mb-4">Access Denied</h1>
-            <p className="text-gray-600 mb-4">
-              You need to be a marketer to view commissions.
-            </p>
-            <button
-              onClick={() => window.location.href = '/marketers/join'}
-              className="bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors"
-            >
-              Apply to Become a Marketer
-            </button>
-          </div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Access Denied</h1>
+          <p className="text-gray-600 mb-4">
+            You need to be a marketer to view commissions.
+          </p>
+          <button
+            onClick={() => window.location.href = '/marketers/join'}
+            className="bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors"
+          >
+            Apply to Become a Marketer
+          </button>
         </div>
-      </Layout>
+      </div>
     );
   }
 
   if (loading) {
     return (
-      <Layout>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="text-center">Loading...</div>
         </div>
-      </Layout>
     );
   }
 
   if (error) {
     return (
-      <Layout>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="text-center">
             <h1 className="text-2xl font-bold text-gray-900 mb-4">Error</h1>
@@ -95,13 +87,11 @@ export default function MarketerCommissionsPage() {
             </button>
           </div>
         </div>
-      </Layout>
     );
   }
 
   return (
-    <Layout>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-8">Commission Dashboard</h1>
 
         {/* Summary Cards */}
@@ -251,7 +241,6 @@ export default function MarketerCommissionsPage() {
             <p>• Payouts are processed monthly for approved commissions</p>
           </div>
         </div>
-      </div>
-    </Layout>
+    </div>
   );
 }

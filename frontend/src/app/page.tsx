@@ -148,7 +148,7 @@ export default function HomePage() {
         <div className="container py-5">
           <div className="text-center mb-5" data-aos="fade-up">
             <h2 style={{ color: '#1f2937', fontSize: '2.5rem', fontWeight: '800', marginBottom: '1rem' }}>
-              امکانات آکادمی
+              دسترسی سریع
             </h2>
             <p style={{ color: '#6b7280', fontSize: '1.2rem' }}>
               تمام آنچه برای یادگیری حرفه‌ای نیاز دارید
@@ -157,94 +157,155 @@ export default function HomePage() {
           
           <div className="row g-4">
             {/* Feature Card 1 */}
-            <div className="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
-              <div className="feature-card">
-                <div className="feature-icon">
-                  <i className="fas fa-video fa-3x"></i>
+            <div className="col-lg-4 col-md-6" data-aos="zoom-in" data-aos-delay="100">
+              <Link href="/marketers" className="feature-card enhanced-card" style={{ 
+                textDecoration: 'none', 
+                color: 'white',
+                display: 'block',
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                borderRadius: '25px',
+                padding: '3rem 2rem',
+                textAlign: 'center',
+                boxShadow: '0 15px 35px rgba(102, 126, 234, 0.3)',
+                transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                border: 'none',
+                height: '100%',
+                position: 'relative',
+                overflow: 'hidden'
+              }}>
+                <div className="card-shine"></div>
+                <div className="feature-icon" style={{ color: 'white' }}>
+                  <i className="fas fa-users fa-3x"></i>
                 </div>
-                <h5>آموزش ویدئویی</h5>
-                  </div>
+                <h5 style={{ color: 'white', fontWeight: '700' }}>باشگاه فروشندگان</h5>
+                    </Link>
             </div>
             
             {/* Feature Card 2 */}
-            <div className="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="150">
-              <div className="feature-card">
-                <div className="feature-icon">
-                  <i className="fas fa-certificate fa-3x"></i>
+            <div className="col-lg-4 col-md-6" data-aos="zoom-in" data-aos-delay="150">
+              <Link href="/packages" className="feature-card enhanced-card" style={{ 
+                textDecoration: 'none', 
+                color: 'white',
+                display: 'block',
+                background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+                borderRadius: '25px',
+                padding: '3rem 2rem',
+                textAlign: 'center',
+                boxShadow: '0 15px 35px rgba(240, 147, 251, 0.3)',
+                transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                border: 'none',
+                height: '100%',
+                position: 'relative',
+                overflow: 'hidden'
+              }}>
+                <div className="card-shine"></div>
+                <div className="feature-icon" style={{ color: 'white' }}>
+                  <i className="fas fa-gift fa-3x"></i>
                 </div>
-                <h5>گواهی معتبر</h5>
-                  </div>
-                </div>
-                
-            {/* Feature Card 3 */}
-            <div className="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
-              <div className="feature-card">
-                <div className="feature-icon">
-                  <i className="fas fa-calendar-alt fa-3x"></i>
-                    </div>
-                <h5>برنامه روزانه</h5>
-                    </div>
+                <h5 style={{ color: 'white', fontWeight: '700' }}>پکیج های ویژه</h5>
+              </Link>
                   </div>
                   
-            {/* Feature Card 4 */}
-            <div className="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="250">
-              <div className="feature-card">
-                <div className="feature-icon">
-                  <i className="fas fa-user-md fa-3x"></i>
+            {/* Feature Card 3 */}
+            <div className="col-lg-4 col-md-6" data-aos="zoom-in" data-aos-delay="200">
+              <Link href="/courses" className="feature-card enhanced-card" style={{ 
+                textDecoration: 'none', 
+                color: 'white',
+                display: 'block',
+                background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+                borderRadius: '25px',
+                padding: '3rem 2rem',
+                textAlign: 'center',
+                boxShadow: '0 15px 35px rgba(79, 172, 254, 0.3)',
+                transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                border: 'none',
+                height: '100%',
+                position: 'relative',
+                overflow: 'hidden'
+              }}>
+                <div className="card-shine"></div>
+                <div className="feature-icon" style={{ color: 'white' }}>
+                  <i className="fas fa-th-large fa-3x"></i>
                 </div>
-                <h5>مشاوره تخصصی</h5>
-              </div>
+                <h5 style={{ color: 'white', fontWeight: '700' }}>همه دوره ها</h5>
+                    </Link>
+                  </div>
+            
+            {/* Feature Card 4 */}
+            <div className="col-lg-4 col-md-6" data-aos="zoom-in" data-aos-delay="250">
+              <Link href="/profile" className="feature-card enhanced-card" style={{ 
+                textDecoration: 'none', 
+                color: 'white',
+                display: 'block',
+                background: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+                borderRadius: '25px',
+                padding: '3rem 2rem',
+                textAlign: 'center',
+                boxShadow: '0 15px 35px rgba(67, 233, 123, 0.3)',
+                transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                border: 'none',
+                height: '100%',
+                position: 'relative',
+                overflow: 'hidden'
+              }}>
+                <div className="card-shine"></div>
+                <div className="feature-icon" style={{ color: 'white' }}>
+                  <i className="fas fa-user fa-3x"></i>
+                </div>
+                <h5 style={{ color: 'white', fontWeight: '700' }}>پروفایل</h5>
+              </Link>
             </div>
             
             {/* Feature Card 5 */}
-            <div className="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="300">
-              <div className="feature-card">
-                <div className="feature-icon">
-                  <i className="fas fa-book-medical fa-3x"></i>
+            <div className="col-lg-4 col-md-6" data-aos="zoom-in" data-aos-delay="300">
+              <Link href="/about" className="feature-card enhanced-card" style={{ 
+                textDecoration: 'none', 
+                color: 'white',
+                display: 'block',
+                background: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+                borderRadius: '25px',
+                padding: '3rem 2rem',
+                textAlign: 'center',
+                boxShadow: '0 15px 35px rgba(250, 112, 154, 0.3)',
+                transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                border: 'none',
+                height: '100%',
+                position: 'relative',
+                overflow: 'hidden'
+              }}>
+                <div className="card-shine"></div>
+                <div className="feature-icon" style={{ color: 'white' }}>
+                  <i className="fas fa-info-circle fa-3x"></i>
                 </div>
-                <h5>منابع آموزشی</h5>
+                <h5 style={{ color: 'white', fontWeight: '700' }}>درباره ما</h5>
+              </Link>
                   </div>
-                  </div>
-            
+                  
             {/* Feature Card 6 */}
-            <div className="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="350">
-              <div className="feature-card">
-                <div className="feature-icon">
-                  <i className="fas fa-headset fa-3x"></i>
+            <div className="col-lg-4 col-md-6" data-aos="zoom-in" data-aos-delay="350">
+              <Link href="/marketers/join" className="feature-card enhanced-card" style={{ 
+                textDecoration: 'none', 
+                color: 'white',
+                display: 'block',
+                background: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
+                borderRadius: '25px',
+                padding: '3rem 2rem',
+                textAlign: 'center',
+                boxShadow: '0 15px 35px rgba(168, 237, 234, 0.3)',
+                transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                border: 'none',
+                height: '100%',
+                position: 'relative',
+                overflow: 'hidden'
+              }}>
+                <div className="card-shine"></div>
+                <div className="feature-icon" style={{ color: 'white' }}>
+                  <i className="fas fa-user-plus fa-3x"></i>
                 </div>
-                <h5>پشتیبانی ۲۴/۷</h5>
-                    </div>
-                  </div>
-                  
-            {/* Feature Card 7 */}
-            <div className="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="400">
-              <div className="feature-card">
-                <div className="feature-icon">
-                  <i className="fas fa-users fa-3x"></i>
-                </div>
-                <h5>انجمن دانشجویان</h5>
-              </div>
-            </div>
-            
-            {/* Feature Card 8 */}
-            <div className="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="450">
-              <div className="feature-card">
-                <div className="feature-icon">
-                  <i className="fas fa-chart-line fa-3x"></i>
-                </div>
-                <h5>رصد پیشرفت</h5>
-                    </div>
-                  </div>
-                  
-            {/* Feature Card 9 */}
-            <div className="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="500">
-              <div className="feature-card">
-                <div className="feature-icon">
-                  <i className="fas fa-mobile-alt fa-3x"></i>
-                </div>
-                <h5>دسترسی موبایل</h5>
-              </div>
-            </div>
+                <h5 style={{ color: 'white', fontWeight: '700' }}>پیوستن به تیم فروشندگان</h5>
+              </Link>
+          </div>
+          
           </div>
         </div>
       </section>
@@ -543,6 +604,10 @@ export default function HomePage() {
           box-shadow: 0 20px 40px rgba(102, 126, 234, 0.15);
         }
 
+        .feature-card:hover .feature-icon {
+          transform: scale(1.1);
+        }
+
         .feature-icon {
           margin-bottom: 1.5rem;
           color: #667eea;
@@ -694,6 +759,55 @@ export default function HomePage() {
         .cta-btn:hover {
           transform: translateY(-3px);
           box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+        }
+
+        /* Enhanced Card Styles */
+        .enhanced-card {
+          position: relative;
+          overflow: hidden;
+        }
+
+        .enhanced-card::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: -100%;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+          transition: left 0.5s;
+        }
+
+        .enhanced-card:hover::before {
+          left: 100%;
+        }
+
+        .card-shine {
+          position: absolute;
+          top: -50%;
+          left: -50%;
+          width: 200%;
+          height: 200%;
+          background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+          opacity: 0;
+          transition: opacity 0.3s ease;
+        }
+
+        .enhanced-card:hover .card-shine {
+          opacity: 1;
+        }
+
+        .enhanced-card:hover {
+          transform: translateY(-15px) scale(1.05);
+          box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
+        }
+
+        .enhanced-card .feature-icon {
+          transition: all 0.3s ease;
+        }
+
+        .enhanced-card:hover .feature-icon {
+          transform: scale(1.2) rotate(5deg);
         }
 
         /* Responsive adjustments */

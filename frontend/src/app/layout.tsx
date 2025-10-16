@@ -15,7 +15,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fa" dir="rtl">
+    <html lang="fa" dir="rtl" data-scroll-behavior="smooth">
       <head>
         {/* Bootstrap 5 RTL CSS */}
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet" />
@@ -28,7 +28,7 @@ export default function RootLayout({
         {/* AOS Animation Library */}
         <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet" />
       </head>
-      <body className="antialiased">
+      <body className="antialiased" suppressHydrationWarning={true}>
         <FontLoader />
         <AuthProvider>
           <Layout>
@@ -38,8 +38,6 @@ export default function RootLayout({
         
         {/* Bootstrap 5 JS */}
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-        {/* AOS Animation Library */}
-        <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
       </body>
     </html>
   );

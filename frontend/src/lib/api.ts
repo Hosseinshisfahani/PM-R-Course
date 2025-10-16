@@ -36,18 +36,27 @@ async function apiFetch(input: RequestInfo, init: RequestInit = {}): Promise<Res
     }
   }
   
-  const response = await fetch(`${API_BASE}${input}`, {
-    ...init,
-    headers,
-    credentials: 'include', // Include cookies for session auth
-  });
-  
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new ApiError(response.status, errorData.error || `HTTP ${response.status}`);
+  try {
+    const response = await fetch(`${API_BASE}${input}`, {
+      ...init,
+      headers,
+      credentials: 'include', // Include cookies for session auth
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new ApiError(response.status, errorData.error || `HTTP ${response.status}`);
+    }
+    
+    return response;
+  } catch (error) {
+    if (error instanceof TypeError && error.message === 'Failed to fetch') {
+      console.error('Network error: Unable to connect to backend server. Make sure Django is running on', API_BASE);
+      console.error('Full error:', error);
+      throw new ApiError(0, 'Backend server is not running. Please start the Django server.');
+    }
+    throw error;
   }
-  
-  return response;
 }
 
 // Auth API
@@ -136,6 +145,16 @@ export const coursesApi = {
   
   async getVideo(courseSlug: string, videoId: number) {
     const response = await apiFetch(`/courses/${courseSlug}/videos/${videoId}/`);
+    return response.json();
+  },
+  
+  async getPackages() {
+    const response = await apiFetch('/courses/packages/');
+    return response.json();
+  },
+  
+  async getPackage(slug: string) {
+    const response = await apiFetch(`/courses/packages/${slug}/`);
     return response.json();
   },
 };
@@ -247,6 +266,242 @@ export const marketerApi = {
   
   async getCommissions() {
     const response = await apiFetch('/payments/marketers/commissions/');
+    return response.json();
+  },
+};
+
+// Admin API
+export const adminApi = {
+  async getDashboardStats() {
+    const response = await apiFetch('/admin/dashboard/stats/');
+    return response.json();
+  },
+  
+  async getUsers(params?: {
+    search?: string;
+    user_type?: string;
+  }) {
+    const searchParams = new URLSearchParams();
+    if (params?.search) searchParams.set('search', params.search);
+    if (params?.user_type) searchParams.set('user_type', params.user_type);
+    
+    const query = searchParams.toString();
+    const response = await apiFetch(`/admin/users/${query ? `?${query}` : ''}`);
+    return response.json();
+  },
+  
+  async updateUser(userId: number, data: {
+    user_type?: string;
+    is_active?: boolean;
+  }) {
+    const response = await apiFetch(`/admin/users/${userId}/`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+    return response.json();
+  },
+  
+  async getMarketerRequests(params?: {
+    status?: string;
+  }) {
+    const searchParams = new URLSearchParams();
+    if (params?.status) searchParams.set('status', params.status);
+    
+    const query = searchParams.toString();
+    const response = await apiFetch(`/admin/marketer-requests/${query ? `?${query}` : ''}`);
+    return response.json();
+  },
+  
+  async approveMarketerRequest(requestId: number, adminNotes?: string) {
+    const response = await apiFetch(`/admin/marketer-requests/${requestId}/`, {
+      method: 'POST',
+      body: JSON.stringify({
+        action: 'approve',
+        admin_notes: adminNotes,
+      }),
+    });
+    return response.json();
+  },
+  
+  async rejectMarketerRequest(requestId: number, adminNotes?: string) {
+    const response = await apiFetch(`/admin/marketer-requests/${requestId}/`, {
+      method: 'POST',
+      body: JSON.stringify({
+        action: 'reject',
+        admin_notes: adminNotes,
+      }),
+    });
+    return response.json();
+  },
+  
+  async getPurchases(params?: {
+    start_date?: string;
+    end_date?: string;
+    status?: string;
+  }) {
+    const searchParams = new URLSearchParams();
+    if (params?.start_date) searchParams.set('start_date', params.start_date);
+    if (params?.end_date) searchParams.set('end_date', params.end_date);
+    if (params?.status) searchParams.set('status', params.status);
+    
+    const query = searchParams.toString();
+    const response = await apiFetch(`/admin/purchases/${query ? `?${query}` : ''}`);
+    return response.json();
+  },
+  
+  async getCommissions(params?: {
+    status?: string;
+  }) {
+    const searchParams = new URLSearchParams();
+    if (params?.status) searchParams.set('status', params.status);
+    
+    const query = searchParams.toString();
+    const response = await apiFetch(`/admin/commissions/${query ? `?${query}` : ''}`);
+    return response.json();
+  },
+  
+  async markCommissionPaid(commissionId: number) {
+    const response = await apiFetch(`/admin/commissions/${commissionId}/mark-paid/`, {
+      method: 'POST',
+    });
+    return response.json();
+  },
+  
+  async getCourses(params?: {
+    search?: string;
+    is_published?: boolean;
+  }) {
+    const searchParams = new URLSearchParams();
+    if (params?.search) searchParams.set('search', params.search);
+    if (params?.is_published !== undefined) searchParams.set('is_published', params.is_published.toString());
+    
+    const query = searchParams.toString();
+    const response = await apiFetch(`/admin/courses/${query ? `?${query}` : ''}`);
+    return response.json();
+  },
+  
+  async updateCourse(courseId: number, data: {
+    is_published?: boolean;
+    is_featured?: boolean;
+  }) {
+    const response = await apiFetch(`/admin/courses/${courseId}/`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+    return response.json();
+  },
+  
+  async deleteCourse(courseId: number) {
+    const response = await apiFetch(`/admin/courses/${courseId}/`, {
+      method: 'DELETE',
+    });
+    return response.json();
+  },
+  
+  async getPackages(params?: {
+    search?: string;
+    is_published?: boolean;
+  }) {
+    const searchParams = new URLSearchParams();
+    if (params?.search) searchParams.set('search', params.search);
+    if (params?.is_published !== undefined) searchParams.set('is_published', params.is_published.toString());
+    
+    const query = searchParams.toString();
+    const response = await apiFetch(`/admin/packages/${query ? `?${query}` : ''}`);
+    return response.json();
+  },
+  
+  async updatePackage(packageId: number, data: {
+    is_published?: boolean;
+    is_featured?: boolean;
+  }) {
+    const response = await apiFetch(`/admin/packages/${packageId}/`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+    return response.json();
+  },
+  
+  async deletePackage(packageId: number) {
+    const response = await apiFetch(`/admin/packages/${packageId}/`, {
+      method: 'DELETE',
+    });
+    return response.json();
+  },
+  
+  async getTickets(params?: {
+    search?: string;
+    status?: string;
+    priority?: string;
+    category?: string;
+  }) {
+    const searchParams = new URLSearchParams();
+    if (params?.search) searchParams.set('search', params.search);
+    if (params?.status) searchParams.set('status', params.status);
+    if (params?.priority) searchParams.set('priority', params.priority);
+    if (params?.category) searchParams.set('category', params.category);
+    
+    const query = searchParams.toString();
+    const response = await apiFetch(`/admin/tickets/${query ? `?${query}` : ''}`);
+    return response.json();
+  },
+  
+  async getTicket(ticketId: number) {
+    const response = await apiFetch(`/admin/tickets/${ticketId}/`);
+    return response.json();
+  },
+  
+  async updateTicket(ticketId: number, data: {
+    status?: string;
+    priority?: string;
+    assigned_to?: number;
+  }) {
+    const response = await apiFetch(`/admin/tickets/${ticketId}/`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+    return response.json();
+  },
+  
+  async replyToTicket(ticketId: number, message: string) {
+    const response = await apiFetch(`/admin/tickets/${ticketId}/reply/`, {
+      method: 'POST',
+      body: JSON.stringify({ message }),
+    });
+    return response.json();
+  },
+};
+
+// Tickets API (for users)
+export const ticketsApi = {
+  async getMyTickets() {
+    const response = await apiFetch('/tickets/');
+    return response.json();
+  },
+  
+  async getTicket(ticketId: number) {
+    const response = await apiFetch(`/tickets/${ticketId}/`);
+    return response.json();
+  },
+  
+  async createTicket(data: {
+    subject: string;
+    description: string;
+    priority: string;
+    category: string;
+  }) {
+    const response = await apiFetch('/tickets/', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+    return response.json();
+  },
+  
+  async replyToTicket(ticketId: number, message: string) {
+    const response = await apiFetch(`/tickets/${ticketId}/`, {
+      method: 'POST',
+      body: JSON.stringify({ message }),
+    });
     return response.json();
   },
 };

@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useRole } from '@/lib/auth';
 import Link from 'next/link';
 
 interface UserProfile {
@@ -10,15 +11,19 @@ interface UserProfile {
   first_name: string;
   last_name: string;
   username: string;
-  phone_number: string;
-  birth_date: string;
+  phone_number?: string;
+  birth_date?: string;
   user_type: string;
-  date_joined: string;
+  created_at: string;
   profile_image?: string;
+  is_staff_member?: boolean;
+  is_admin_user?: boolean;
+  is_customer?: boolean;
 }
 
 export default function ProfilePage() {
   const { user, loading } = useAuth();
+  const { isAdmin, isMarketer, canAccessMarketerFeatures, roleDisplayName, roleColor, roleIcon } = useRole();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
 
@@ -327,12 +332,15 @@ export default function ProfilePage() {
                   </div>
                   <div className="info-item">
                     <span className="info-label">نوع کاربر:</span>
-                    <span className="info-value">{profile?.user_type || "عادی"}</span>
+                    <span className={`info-value badge bg-${roleColor}`}>
+                      <i className={`${roleIcon} me-1`}></i>
+                      {roleDisplayName}
+                    </span>
                   </div>
                   <div className="info-item">
                     <span className="info-label">تاریخ عضویت:</span>
                     <span className="info-value">
-                      {profile?.date_joined ? englishToPersian(new Date(profile.date_joined).toLocaleDateString('fa-IR')) : "-"}
+                      {profile?.created_at ? englishToPersian(new Date(profile.created_at).toLocaleDateString('fa-IR')) : "-"}
                     </span>
                   </div>
                 </div>
@@ -372,10 +380,10 @@ export default function ProfilePage() {
                     <span className="stats-number">۷۵%</span>
                     <div className="status-badge">در حال یادگیری</div>
                   </div>
-                  <button className="btn card-button">
-                    <i className="fas fa-plus"></i>
-                    ثبت/مشاهده +
-                  </button>
+                  <Link href="/learning-progress" className="btn card-button">
+                    <i className="fas fa-chart-line"></i>
+                    مشاهده پیشرفت
+                  </Link>
                 </div>
                 
                 {/* Payment History */}
@@ -389,10 +397,10 @@ export default function ProfilePage() {
                     <span className="stats-number">۱۲ مورد</span>
                     <div className="status-badge">آخرین: ۲ روز پیش</div>
                   </div>
-                  <button className="btn card-button">
+                  <Link href="/purchase-history" className="btn card-button">
                     <i className="fas fa-eye"></i>
                     مشاهده
-                  </button>
+                  </Link>
                 </div>
                 
                 {/* Certificates */}
@@ -406,79 +414,62 @@ export default function ProfilePage() {
                     <span className="stats-number">۳ گواهی</span>
                     <div className="status-badge">آخرین: ۱ هفته پیش</div>
                   </div>
-                  <button className="btn card-button">
+                  <Link href="/certificates" className="btn card-button">
                     <i className="fas fa-eye"></i>
                     مشاهده
-                  </button>
+                  </Link>
                 </div>
                 
-                {/* Study Materials */}
-                <div className="dashboard-card" data-aos="fade-up" data-aos-delay="500">
-                  <div className="card-icon card-teal">
-                    <i className="fas fa-book"></i>
+                {/* Marketer Club - Only show if user can access marketer features */}
+                {canAccessMarketerFeatures && (
+                  <div className="dashboard-card" data-aos="fade-up" data-aos-delay="500">
+                    <div className="card-icon card-indigo">
+                      <i className="fas fa-users"></i>
+                    </div>
+                    <h3 className="card-title">باشگاه بازاریابان</h3>
+                    <p className="card-subtitle">مدیریت کدهای معرفی و کمیسیون‌ها</p>
+                    <div className="text-center mb-3">
+                      <span className="stats-number">فعال</span>
+                      <div className="status-badge">عضو باشگاه</div>
+                    </div>
+                    <div className="d-grid gap-2">
+                      <Link href="/marketers/referral-codes" className="btn card-button">
+                        <i className="fas fa-code"></i>
+                        کدهای معرفی
+                      </Link>
+                      <Link href="/marketers/commissions" className="btn card-button">
+                        <i className="fas fa-chart-line"></i>
+                        کمیسیون‌ها
+                      </Link>
+                    </div>
                   </div>
-                  <h3 className="card-title">منابع مطالعاتی</h3>
-                  <p className="card-subtitle">کتاب‌ها، جزوات و منابع آموزشی</p>
-                  <div className="text-center mb-3">
-                    <span className="stats-number">۲۵ فایل</span>
-                    <div className="status-badge">PDF، ویدیو، صوت</div>
+                )}
+
+                {/* Admin Panel - Only show if user is admin */}
+                {isAdmin && (
+                  <div className="dashboard-card" data-aos="fade-up" data-aos-delay="600">
+                    <div className="card-icon card-red">
+                      <i className="fas fa-crown"></i>
+                    </div>
+                    <h3 className="card-title">پنل مدیریت</h3>
+                    <p className="card-subtitle">مدیریت سیستم و کاربران</p>
+                    <div className="text-center mb-3">
+                      <span className="stats-number">مدیر</span>
+                      <div className="status-badge">دسترسی کامل</div>
+                    </div>
+                    <div className="d-grid gap-2">
+                      <Link href="/admin/users" className="btn card-button">
+                        <i className="fas fa-users-cog"></i>
+                        مدیریت کاربران
+                      </Link>
+                      <Link href="/admin/courses" className="btn card-button">
+                        <i className="fas fa-graduation-cap"></i>
+                        مدیریت دوره‌ها
+                      </Link>
+                    </div>
                   </div>
-                  <button className="btn card-button">
-                    <i className="fas fa-eye"></i>
-                    مشاهده
-                  </button>
-                </div>
+                )}
                 
-                {/* Support */}
-                <div className="dashboard-card" data-aos="fade-up" data-aos-delay="600">
-                  <div className="card-icon card-pink">
-                    <i className="fas fa-headset"></i>
-                  </div>
-                  <h3 className="card-title">پشتیبانی</h3>
-                  <p className="card-subtitle">ارتباط با تیم پشتیبانی و اساتید</p>
-                  <div className="text-center mb-3">
-                    <span className="stats-number">۲۴/۷</span>
-                    <div className="status-badge">پشتیبانی آنلاین</div>
-                  </div>
-                  <button className="btn card-button">
-                    <i className="fas fa-comments"></i>
-                    تماس با پشتیبانی
-                  </button>
-                </div>
-                
-                {/* Study Schedule */}
-                <div className="dashboard-card" data-aos="fade-up" data-aos-delay="700">
-                  <div className="card-icon card-indigo">
-                    <i className="fas fa-calendar-alt"></i>
-                  </div>
-                  <h3 className="card-title">برنامه مطالعاتی</h3>
-                  <p className="card-subtitle">برنامه‌ریزی و زمان‌بندی مطالعه</p>
-                  <div className="text-center mb-3">
-                    <span className="stats-number">۵ برنامه</span>
-                    <div className="status-badge">فعال: ۲ برنامه</div>
-                  </div>
-                  <button className="btn card-button">
-                    <i className="fas fa-plus"></i>
-                    ایجاد برنامه جدید
-                  </button>
-                </div>
-                
-                {/* Achievements */}
-                <div className="dashboard-card" data-aos="fade-up" data-aos-delay="800">
-                  <div className="card-icon card-red">
-                    <i className="fas fa-trophy"></i>
-                  </div>
-                  <h3 className="card-title">دستاوردها</h3>
-                  <p className="card-subtitle">نشان‌ها و دستاوردهای کسب شده</p>
-                  <div className="text-center mb-3">
-                    <span className="stats-number">۸ نشان</span>
-                    <div className="status-badge">آخرین: ۳ روز پیش</div>
-                  </div>
-                  <button className="btn card-button">
-                    <i className="fas fa-eye"></i>
-                    مشاهده
-                  </button>
-                </div>
               </div>
             </div>
           </div>

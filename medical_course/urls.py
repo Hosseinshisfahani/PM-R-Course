@@ -22,6 +22,9 @@ from django.conf.urls.static import static
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('medical_course.api_urls')),  # API endpoints
+    path('api/tickets/', include('tickets.api_urls')),
+    path('api/admin/', include('medical_course.admin_api_urls')),
+    path('api/health/', include('medical_course.health_urls')),
     path('ckeditor/', include('ckeditor_uploader.urls')),
     path('accounts/', include('accounts.urls')),
     path('payments/', include('payments.urls')),
