@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { marketerApi } from '@/lib/api';
+import { Toast, useToast } from '@/components/Toast';
 
 export default function MarketerJoinPage() {
   const { user, loading: authLoading } = useAuth();
@@ -13,6 +14,7 @@ export default function MarketerJoinPage() {
   const [success, setSuccess] = useState(false);
   const [checkingExisting, setCheckingExisting] = useState(true);
   const [existingRequest, setExistingRequest] = useState<any>(null);
+  const { toast, showToast, hideToast } = useToast();
 
   const [formData, setFormData] = useState({
     full_name: '',
@@ -55,12 +57,15 @@ export default function MarketerJoinPage() {
     try {
       await marketerApi.createRequest(formData);
       setSuccess(true);
+      showToast('درخواست شما با موفقیت ارسال شد', 'success');
     } catch (error: any) {
       const errorMessage = error.message || 'خطا در ارسال درخواست. لطفا دوباره تلاش کنید.';
       if (errorMessage.includes('already have a pending request') || errorMessage.includes('قبلاً درخواست')) {
         setError('شما قبلاً درخواست عضویت ثبت کرده‌اید. لطفاً منتظر بررسی آن باشید.');
+        showToast('شما قبلاً درخواست عضویت ثبت کرده‌اید', 'warning');
       } else {
         setError(errorMessage);
+        showToast('خطا در ارسال درخواست', 'error');
       }
     } finally {
       setLoading(false);
@@ -686,6 +691,8 @@ export default function MarketerJoinPage() {
           box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
         }
       `}</style>
+      
+      <Toast {...toast} onClose={hideToast} />
     </div>
   );
 }

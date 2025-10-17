@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { marketerApi } from '@/lib/api';
 import { ReferralCode } from '@/types';
-import Layout from '@/components/Layout';
+import { Toast, useToast } from '@/components/Toast';
 
 export default function MarketerReferralCodesPage() {
   const { user } = useAuth();
@@ -13,6 +13,7 @@ export default function MarketerReferralCodesPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [deletingCode, setDeletingCode] = useState<number | null>(null);
+  const { toast, showToast, hideToast } = useToast();
 
   useEffect(() => {
     if (user && user.is_staff_member) {
@@ -33,22 +34,28 @@ export default function MarketerReferralCodesPage() {
     }
   };
 
-  const copyToClipboard = (code: string) => {
+  const copyLinkToClipboard = (code: string) => {
     navigator.clipboard.writeText(`${window.location.origin}/r/${code}`);
-    // You could add a toast notification here
+    showToast('لینک کد معرفی کپی شد', 'success');
+  };
+
+  const copyCodeToClipboard = (code: string) => {
+    navigator.clipboard.writeText(code);
+    showToast('کد معرفی کپی شد', 'success');
   };
 
   const toggleCodeStatus = async (codeId: number, isActive: boolean) => {
     try {
       await marketerApi.updateCode(codeId, { is_active: isActive });
       await fetchCodes(); // Refresh the list
+      showToast(isActive ? 'کد معرفی فعال شد' : 'کد معرفی غیرفعال شد', 'success');
     } catch (error: any) {
-      alert('Failed to update code status');
+      showToast('خطا در تغییر وضعیت کد', 'error');
     }
   };
 
   const deleteCode = async (codeId: number) => {
-    if (!confirm('Are you sure you want to delete this referral code? This action cannot be undone.')) {
+    if (!confirm('آیا مطمئن هستید که می‌خواهید این کد معرفی را حذف کنید؟ این عمل قابل بازگشت نیست.')) {
       return;
     }
 
@@ -56,8 +63,9 @@ export default function MarketerReferralCodesPage() {
     try {
       await marketerApi.deleteCode(codeId);
       await fetchCodes(); // Refresh the list
+      showToast('کد معرفی حذف شد', 'success');
     } catch (error: any) {
-      alert('Failed to delete referral code');
+      showToast('خطا در حذف کد معرفی', 'error');
     } finally {
       setDeletingCode(null);
     }
@@ -65,303 +73,386 @@ export default function MarketerReferralCodesPage() {
 
   if (!user) {
     return (
-      <Layout>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold text-gray-900 mb-4">Please log in to view your referral codes</h1>
-            <button
-              onClick={() => window.location.href = '/login'}
-              className="bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors"
-            >
-              Login
-            </button>
+      <div className="min-vh-100 d-flex align-items-center justify-content-center bg-light">
+        <div className="container">
+          <div className="row justify-content-center">
+            <div className="col-md-6 col-lg-5">
+              <div className="card border-0 shadow-lg">
+                <div className="card-body p-5 text-center">
+                  <div className="mb-4">
+                    <i className="fas fa-user-lock fa-4x text-primary"></i>
+                  </div>
+                  <h2 className="h4 mb-3">ورود به حساب کاربری</h2>
+                  <p className="text-muted mb-4">
+                    برای مشاهده کدهای معرفی خود باید وارد حساب کاربری شوید
+                  </p>
+                  <button
+                    onClick={() => window.location.href = '/login'}
+                    className="btn btn-primary btn-lg px-5"
+                  >
+                    <i className="fas fa-sign-in-alt me-2"></i>
+                    ورود
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-      </Layout>
+        <Toast {...toast} onClose={hideToast} />
+      </div>
     );
   }
 
   if (!user.is_staff_member) {
     return (
-      <Layout>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold text-gray-900 mb-4">Access Denied</h1>
-            <p className="text-gray-600 mb-4">
-              You need to be a marketer to access this page.
-            </p>
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6 max-w-md mx-auto">
-              <p className="text-sm text-yellow-800">
-                <strong>Current Status:</strong> You are logged in as a {user.user_type} user.
-                <br />
-                To become a marketer, you need to apply and get approved by an admin.
-              </p>
+      <div className="min-vh-100 d-flex align-items-center justify-content-center bg-light">
+        <div className="container">
+          <div className="row justify-content-center">
+            <div className="col-md-8 col-lg-6">
+              <div className="card border-0 shadow-lg">
+                <div className="card-body p-5 text-center">
+                  <div className="mb-4">
+                    <i className="fas fa-ban fa-4x text-warning"></i>
+                  </div>
+                  <h2 className="h3 mb-3">دسترسی محدود</h2>
+                  <p className="text-muted mb-4">
+                    برای دسترسی به این صفحه باید بازاریاب باشید
+                  </p>
+                  <div className="alert alert-warning border-0 mb-4">
+                    <p className="mb-0">
+                      <strong>وضعیت فعلی:</strong> شما به عنوان کاربر {user.user_type} وارد شده‌اید.
+                      <br />
+                      برای تبدیل شدن به بازاریاب، باید درخواست دهید و توسط ادمین تایید شوید.
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => window.location.href = '/marketers/join'}
+                    className="btn btn-primary btn-lg px-5"
+                  >
+                    <i className="fas fa-user-plus me-2"></i>
+                    درخواست عضویت بازاریاب
+                  </button>
+                </div>
+              </div>
             </div>
-            <button
-              onClick={() => window.location.href = '/marketers/join'}
-              className="bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors"
-            >
-              Apply to Become a Marketer
-            </button>
           </div>
         </div>
-      </Layout>
+        <Toast {...toast} onClose={hideToast} />
+      </div>
     );
   }
 
   if (loading) {
     return (
-      <Layout>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="mt-4 text-gray-600">Loading your referral codes...</p>
+      <div className="min-vh-100 d-flex align-items-center justify-content-center bg-light">
+        <div className="text-center">
+          <div className="spinner-border text-primary" role="status" style={{ width: '3rem', height: '3rem' }}>
+            <span className="visually-hidden">در حال بارگذاری...</span>
           </div>
+          <p className="mt-3 h5">در حال بارگذاری کدهای معرفی...</p>
         </div>
-      </Layout>
+        <Toast {...toast} onClose={hideToast} />
+      </div>
     );
   }
 
   if (error) {
     return (
-      <Layout>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold text-gray-900 mb-4">Error</h1>
-            <p className="text-gray-600 mb-4">{error}</p>
-            <button
-              onClick={fetchCodes}
-              className="bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors"
-            >
-              Try Again
-            </button>
+      <div className="min-vh-100 d-flex align-items-center justify-content-center bg-light">
+        <div className="container">
+          <div className="row justify-content-center">
+            <div className="col-md-6 col-lg-5">
+              <div className="card border-0 shadow-lg">
+                <div className="card-body p-5 text-center">
+                  <div className="mb-4">
+                    <i className="fas fa-exclamation-triangle fa-4x text-danger"></i>
+                  </div>
+                  <h2 className="h3 mb-3">خطا</h2>
+                  <p className="text-muted mb-4">{error}</p>
+                  <button
+                    onClick={fetchCodes}
+                    className="btn btn-primary btn-lg px-5"
+                  >
+                    <i className="fas fa-redo me-2"></i>
+                    تلاش مجدد
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-      </Layout>
+        <Toast {...toast} onClose={hideToast} />
+      </div>
     );
   }
 
   return (
-    <Layout>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <>
+      <div className="min-vh-100 bg-light">
+      <div className="container py-5">
         {/* Header Section */}
-        <div className="mb-8">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">My Referral Codes</h1>
-              <p className="mt-2 text-lg text-gray-600">
-                Manage your referral codes and track their performance
-              </p>
-            </div>
-            <div className="mt-4 sm:mt-0">
-              <Link
-                href="/marketers/referral-codes/new"
-                className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
-              >
-                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                </svg>
-                Create New Code
-              </Link>
+        <div className="row mb-4">
+          <div className="col-12">
+            <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
+              <div className="mb-3 mb-md-0">
+                <h1 className="h2 mb-2 fw-bold">
+                  <i className="fas fa-gift text-primary me-2"></i>
+                  کدهای معرفی من
+                </h1>
+                <p className="text-muted h6">کدهای معرفی خود را مدیریت کنید و عملکرد آن‌ها را ردیابی کنید</p>
+              </div>
+              <div>
+                <Link
+                  href="/marketers/referral-codes/new"
+                  className="btn btn-primary btn-lg"
+                  style={{ 
+                    borderRadius: '50px',
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    border: 'none',
+                    fontWeight: '600'
+                  }}
+                >
+                  <i className="fas fa-plus me-2"></i>
+                  ایجاد کد جدید
+                </Link>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Stats Overview */}
-        {codes.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <div className="bg-white overflow-hidden shadow rounded-lg">
-              <div className="p-5">
-                <div className="flex items-center">
-                  <div className="flex-shrink-0">
-                    <svg className="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
+          {/* Stats Overview */}
+          {codes.length > 0 && (
+            <div className="row g-4 mb-5">
+              <div className="col-md-3">
+                <div className="card border-0 shadow-sm h-100">
+                  <div className="card-body text-center">
+                    <div className="mb-3">
+                      <i className="fas fa-gift fa-2x text-primary"></i>
+                    </div>
+                    <h3 className="h4 fw-bold text-primary">{codes.length}</h3>
+                    <p className="text-muted mb-0">کل کدها</p>
                   </div>
-                  <div className="ml-5 w-0 flex-1">
-                    <dl>
-                      <dt className="text-sm font-medium text-gray-500 truncate">Total Codes</dt>
-                      <dd className="text-lg font-medium text-gray-900">{codes.length}</dd>
-                    </dl>
+                </div>
+              </div>
+
+              <div className="col-md-3">
+                <div className="card border-0 shadow-sm h-100">
+                  <div className="card-body text-center">
+                    <div className="mb-3">
+                      <i className="fas fa-check-circle fa-2x text-success"></i>
+                    </div>
+                    <h3 className="h4 fw-bold text-success">
+                      {codes.filter(code => code.is_active).length}
+                    </h3>
+                    <p className="text-muted mb-0">کدهای فعال</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="col-md-3">
+                <div className="card border-0 shadow-sm h-100">
+                  <div className="card-body text-center">
+                    <div className="mb-3">
+                      <i className="fas fa-chart-line fa-2x text-info"></i>
+                    </div>
+                    <h3 className="h4 fw-bold text-info">
+                      {codes.reduce((sum, code) => sum + code.current_uses, 0)}
+                    </h3>
+                    <p className="text-muted mb-0">کل استفاده‌ها</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="col-md-3">
+                <div className="card border-0 shadow-sm h-100">
+                  <div className="card-body text-center">
+                    <div className="mb-3">
+                      <i className="fas fa-percentage fa-2x text-warning"></i>
+                    </div>
+                    <h3 className="h4 fw-bold text-warning">
+                      {codes.length > 0 
+                        ? `${(codes.reduce((sum, code) => sum + code.commission_percentage, 0) / codes.length).toFixed(1)}%`
+                        : '0%'
+                      }
+                    </h3>
+                    <p className="text-muted mb-0">میانگین کمیسیون</p>
                   </div>
                 </div>
               </div>
             </div>
+          )}
 
-            <div className="bg-white overflow-hidden shadow rounded-lg">
-              <div className="p-5">
-                <div className="flex items-center">
-                  <div className="flex-shrink-0">
-                    <svg className="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  </div>
-                  <div className="ml-5 w-0 flex-1">
-                    <dl>
-                      <dt className="text-sm font-medium text-gray-500 truncate">Active Codes</dt>
-                      <dd className="text-lg font-medium text-gray-900">
-                        {codes.filter(code => code.is_active).length}
-                      </dd>
-                    </dl>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white overflow-hidden shadow rounded-lg">
-              <div className="p-5">
-                <div className="flex items-center">
-                  <div className="flex-shrink-0">
-                    <svg className="h-6 w-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4" />
-                    </svg>
-                  </div>
-                  <div className="ml-5 w-0 flex-1">
-                    <dl>
-                      <dt className="text-sm font-medium text-gray-500 truncate">Total Uses</dt>
-                      <dd className="text-lg font-medium text-gray-900">
-                        {codes.reduce((sum, code) => sum + code.current_uses, 0)}
-                      </dd>
-                    </dl>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white overflow-hidden shadow rounded-lg">
-              <div className="p-5">
-                <div className="flex items-center">
-                  <div className="flex-shrink-0">
-                    <svg className="h-6 w-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-                    </svg>
-                  </div>
-                  <div className="ml-5 w-0 flex-1">
-                    <dl>
-                      <dt className="text-sm font-medium text-gray-500 truncate">Avg. Commission</dt>
-                      <dd className="text-lg font-medium text-gray-900">
-                        {codes.length > 0 
-                          ? `${(codes.reduce((sum, code) => sum + code.commission_percentage, 0) / codes.length).toFixed(1)}%`
-                          : '0%'
-                        }
-                      </dd>
-                    </dl>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Referral Codes Grid */}
-        {codes.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {codes.map((code) => (
-              <div key={code.id} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
-                <div className="p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-semibold text-gray-900 font-mono">{code.code}</h3>
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                      code.is_active 
-                        ? 'bg-green-100 text-green-800' 
-                        : 'bg-red-100 text-red-800'
-                    }`}>
-                      {code.is_active ? 'Active' : 'Inactive'}
-                    </span>
-                  </div>
-
-                  <div className="space-y-3 mb-4">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-500">Customer Discount</span>
-                      <span className="font-medium text-green-600">{code.discount_percentage}%</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-500">Your Commission</span>
-                      <span className="font-medium text-blue-600">{code.commission_percentage}%</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-500">Usage</span>
-                      <span className="font-medium">
-                        {code.current_uses}
-                        {code.max_uses && ` / ${code.max_uses}`}
-                        {!code.max_uses && ' / ∞'}
-                      </span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-500">Created</span>
-                      <span className="font-medium">
-                        {new Date(code.created_at).toLocaleDateString()}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="border-t border-gray-200 pt-4">
-                    <div className="flex space-x-2 mb-3">
-                      <button
-                        onClick={() => copyToClipboard(code.code)}
-                        className="flex-1 bg-gray-100 text-gray-700 py-2 px-3 rounded text-sm hover:bg-gray-200 transition-colors font-medium"
-                      >
-                        Copy Link
-                      </button>
-                      <button
-                        onClick={() => {
-                          const url = `${window.location.origin}/r/${code.code}`;
-                          window.open(url, '_blank');
-                        }}
-                        className="flex-1 bg-blue-100 text-blue-700 py-2 px-3 rounded text-sm hover:bg-blue-200 transition-colors font-medium"
-                      >
-                        Preview
-                      </button>
+          {/* Referral Codes Grid */}
+          {codes.length > 0 ? (
+            <div className="row g-4">
+              {codes.map((code) => (
+                <div key={code.id} className="col-lg-4 col-md-6">
+                  <div className="card border-0 shadow-sm h-100 hover-lift">
+                    <div className="card-header bg-gradient text-white" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
+                      <div className="d-flex justify-content-between align-items-center">
+                        <h5 className="mb-0 fw-bold font-monospace">{code.code}</h5>
+                        <span className={`badge ${code.is_active ? 'bg-success' : 'bg-danger'}`}>
+                          {code.is_active ? 'فعال' : 'غیرفعال'}
+                        </span>
+                      </div>
                     </div>
                     
-                    <div className="flex space-x-2">
-                      <button
-                        onClick={() => toggleCodeStatus(code.id, !code.is_active)}
-                        className={`flex-1 py-2 px-3 rounded text-sm font-medium transition-colors ${
-                          code.is_active
-                            ? 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200'
-                            : 'bg-green-100 text-green-700 hover:bg-green-200'
-                        }`}
-                      >
-                        {code.is_active ? 'Deactivate' : 'Activate'}
-                      </button>
-                      <button
-                        onClick={() => deleteCode(code.id)}
-                        disabled={deletingCode === code.id}
-                        className="flex-1 bg-red-100 text-red-700 py-2 px-3 rounded text-sm hover:bg-red-200 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        {deletingCode === code.id ? 'Deleting...' : 'Delete'}
-                      </button>
+                    <div className="card-body">
+                      <div className="row g-3 mb-4">
+                        <div className="col-6">
+                          <div className="text-center">
+                            <i className="fas fa-gift text-success fa-lg mb-2"></i>
+                            <div className="fw-bold text-success">{code.discount_percentage}%</div>
+                            <small className="text-muted">تخفیف مشتری</small>
+                          </div>
+                        </div>
+                        <div className="col-6">
+                          <div className="text-center">
+                            <i className="fas fa-percentage text-primary fa-lg mb-2"></i>
+                            <div className="fw-bold text-primary">{code.commission_percentage}%</div>
+                            <small className="text-muted">کمیسیون شما</small>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="mb-3">
+                        <div className="d-flex justify-content-between mb-2">
+                          <span className="text-muted">استفاده:</span>
+                          <span className="fw-bold">
+                            {code.current_uses}
+                            {code.max_uses && ` / ${code.max_uses}`}
+                            {!code.max_uses && ' / ∞'}
+                          </span>
+                        </div>
+                        <div className="d-flex justify-content-between">
+                          <span className="text-muted">تاریخ ایجاد:</span>
+                          <span className="fw-bold">
+                            {new Date(code.created_at).toLocaleDateString('fa-IR')}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="d-grid gap-2">
+                        <div className="row g-2">
+                          <div className="col-6">
+                            <button
+                              onClick={() => copyLinkToClipboard(code.code)}
+                              className="btn btn-outline-primary btn-sm w-100"
+                            >
+                              <i className="fas fa-link me-1"></i>
+                              کپی لینک
+                            </button>
+                          </div>
+                          <div className="col-6">
+                            <button
+                              onClick={() => copyCodeToClipboard(code.code)}
+                              className="btn btn-outline-secondary btn-sm w-100"
+                            >
+                              <i className="fas fa-copy me-1"></i>
+                              کپی کد
+                            </button>
+                          </div>
+                        </div>
+                        
+                        <div className="row g-2">
+                          <div className="col-12">
+                            <button
+                              onClick={() => {
+                                const url = `${window.location.origin}/r/${code.code}`;
+                                window.open(url, '_blank');
+                              }}
+                              className="btn btn-outline-info btn-sm w-100"
+                            >
+                              <i className="fas fa-eye me-1"></i>
+                              پیش‌نمایش
+                            </button>
+                          </div>
+                        </div>
+                        
+                        <div className="row g-2">
+                          <div className="col-6">
+                            <button
+                              onClick={() => toggleCodeStatus(code.id, !code.is_active)}
+                              className={`btn btn-sm w-100 ${
+                                code.is_active
+                                  ? 'btn-warning'
+                                  : 'btn-success'
+                              }`}
+                            >
+                              {code.is_active ? 'غیرفعال کردن' : 'فعال کردن'}
+                            </button>
+                          </div>
+                          <div className="col-6">
+                            <button
+                              onClick={() => deleteCode(code.id)}
+                              disabled={deletingCode === code.id}
+                              className="btn btn-outline-danger btn-sm w-100"
+                            >
+                              {deletingCode === code.id ? (
+                                <>
+                                  <span className="spinner-border spinner-border-sm me-1"></span>
+                                  در حال حذف...
+                                </>
+                              ) : (
+                                <>
+                                  <i className="fas fa-trash me-1"></i>
+                                  حذف
+                                </>
+                              )}
+                            </button>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-12">
-            <div className="text-gray-400 mb-4">
-              <svg className="mx-auto h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
+              ))}
             </div>
-            <h3 className="text-xl font-medium text-gray-900 mb-2">No referral codes yet</h3>
-            <p className="text-gray-600 mb-6 max-w-md mx-auto">
-              Create your first referral code to start earning commissions from your network. 
-              Share your codes and earn money for every successful referral!
-            </p>
-            <Link
-              href="/marketers/referral-codes/new"
-              className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
-            >
-              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-              </svg>
-              Create Your First Code
-            </Link>
-          </div>
-        )}
+          ) : (
+            <div className="text-center py-5">
+              <div className="card border-0 shadow-sm">
+                <div className="card-body p-5">
+                  <div className="mb-4">
+                    <i className="fas fa-gift fa-4x text-muted"></i>
+                  </div>
+                  <h3 className="h4 mb-3">هنوز کد معرفی ندارید</h3>
+                  <p className="text-muted mb-4">
+                    اولین کد معرفی خود را ایجاد کنید تا از شبکه خود کمیسیون کسب کنید. 
+                    کدهای خود را به اشتراک بگذارید و از هر معرفی موفق درآمد کسب کنید!
+                  </p>
+                  <Link
+                    href="/marketers/referral-codes/new"
+                    className="btn btn-primary btn-lg"
+                    style={{ 
+                      borderRadius: '50px',
+                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                      border: 'none',
+                      fontWeight: '600'
+                    }}
+                  >
+                    <i className="fas fa-plus me-2"></i>
+                    ایجاد اولین کد
+                  </Link>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
-    </Layout>
+      
+      <Toast {...toast} onClose={hideToast} />
+      
+      <style jsx>{`
+        .hover-lift {
+          transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .hover-lift:hover {
+          transform: translateY(-5px);
+          box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15) !important;
+        }
+      `}</style>
+      
+      <Toast {...toast} onClose={hideToast} />
+    </>
   );
 }

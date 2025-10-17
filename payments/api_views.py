@@ -283,8 +283,18 @@ class MarketerCodesView(APIView):
                 status=status.HTTP_403_FORBIDDEN
             )
         
+        # Get default settings
+        from .models import ReferralCodeSettings
+        settings = ReferralCodeSettings.get_settings()
+        
         data = request.data.copy()
         data['marketer'] = request.user.id
+        
+        # Apply default settings if not provided
+        if 'discount_percentage' not in data:
+            data['discount_percentage'] = settings.default_discount_percentage
+        if 'commission_percentage' not in data:
+            data['commission_percentage'] = settings.default_commission_percentage
         
         serializer = ReferralCodeSerializer(data=data)
         if serializer.is_valid():

@@ -15,6 +15,14 @@ urlpatterns = [
     path('marketer-requests/', admin_api_views.AdminMarketerRequestsView.as_view(), name='admin_marketer_requests'),
     path('marketer-requests/<int:request_id>/', admin_api_views.AdminMarketerRequestsView.as_view(), name='admin_marketer_request_action'),
     
+    # Marketers
+    path('marketers/', admin_api_views.AdminMarketersView.as_view(), name='admin_marketers'),
+    
+    # Referral Codes
+    path('referral-codes/', admin_api_views.AdminReferralCodesView.as_view(), name='admin_referral_codes'),
+    path('referral-codes/<int:code_id>/', admin_api_views.AdminReferralCodesView.as_view(), name='admin_referral_code_detail'),
+    path('referral-code-settings/', admin_api_views.AdminReferralCodeSettingsView.as_view(), name='admin_referral_code_settings'),
+    
     # Financial
     path('purchases/', admin_api_views.AdminPurchasesView.as_view(), name='admin_purchases'),
     path('commissions/', admin_api_views.AdminCommissionsView.as_view(), name='admin_commissions'),

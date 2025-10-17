@@ -4,12 +4,14 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { marketerApi } from '@/lib/api';
 import { MarketerCommissions } from '@/types';
+import { Toast, useToast } from '@/components/Toast';
 
 export default function MarketerCommissionsPage() {
   const { user } = useAuth();
   const [commissions, setCommissions] = useState<MarketerCommissions | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const { toast, showToast, hideToast } = useToast();
 
   useEffect(() => {
     if (user && user.is_staff_member) {
@@ -32,215 +34,302 @@ export default function MarketerCommissionsPage() {
 
   if (!user) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Please log in to view your commissions</h1>
-          <button
-            onClick={() => window.location.href = '/login'}
-            className="bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors"
-          >
-            Login
-          </button>
+      <>
+        <div className="min-vh-100 d-flex align-items-center justify-content-center bg-light">
+          <div className="container">
+            <div className="row justify-content-center">
+              <div className="col-md-6 col-lg-5">
+                <div className="card border-0 shadow-lg">
+                  <div className="card-body p-5 text-center">
+                    <div className="mb-4">
+                      <i className="fas fa-user-lock fa-4x text-primary"></i>
+                    </div>
+                    <h2 className="h4 mb-3">ورود به حساب کاربری</h2>
+                    <p className="text-muted mb-4">
+                      برای مشاهده کمیسیون‌های خود باید وارد حساب کاربری شوید
+                    </p>
+                    <button
+                      onClick={() => window.location.href = '/login'}
+                      className="btn btn-primary btn-lg px-5"
+                    >
+                      <i className="fas fa-sign-in-alt me-2"></i>
+                      ورود
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
+        <Toast {...toast} onClose={hideToast} />
+      </>
     );
   }
 
   if (!user.is_staff_member) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Access Denied</h1>
-          <p className="text-gray-600 mb-4">
-            You need to be a marketer to view commissions.
-          </p>
-          <button
-            onClick={() => window.location.href = '/marketers/join'}
-            className="bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors"
-          >
-            Apply to Become a Marketer
-          </button>
+      <>
+        <div className="min-vh-100 d-flex align-items-center justify-content-center bg-light">
+          <div className="container">
+            <div className="row justify-content-center">
+              <div className="col-md-8 col-lg-6">
+                <div className="card border-0 shadow-lg">
+                  <div className="card-body p-5 text-center">
+                    <div className="mb-4">
+                      <i className="fas fa-ban fa-4x text-warning"></i>
+                    </div>
+                    <h2 className="h3 mb-3">دسترسی محدود</h2>
+                    <p className="text-muted mb-4">
+                      برای مشاهده کمیسیون‌ها باید بازاریاب باشید
+                    </p>
+                    <button
+                      onClick={() => window.location.href = '/marketers/join'}
+                      className="btn btn-primary btn-lg px-5"
+                    >
+                      <i className="fas fa-user-plus me-2"></i>
+                      درخواست عضویت بازاریاب
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
+        <Toast {...toast} onClose={hideToast} />
+      </>
     );
   }
 
   if (loading) {
     return (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="text-center">Loading...</div>
+      <>
+        <div className="min-vh-100 d-flex align-items-center justify-content-center bg-light">
+          <div className="text-center">
+            <div className="spinner-border text-primary" role="status" style={{ width: '3rem', height: '3rem' }}>
+              <span className="visually-hidden">در حال بارگذاری...</span>
+            </div>
+            <p className="mt-3 h5">در حال بارگذاری کمیسیون‌ها...</p>
+          </div>
         </div>
+        <Toast {...toast} onClose={hideToast} />
+      </>
     );
   }
 
   if (error) {
     return (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold text-gray-900 mb-4">Error</h1>
-            <p className="text-gray-600 mb-4">{error}</p>
-            <button
-              onClick={fetchCommissions}
-              className="bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors"
-            >
-              Try Again
-            </button>
+      <>
+        <div className="min-vh-100 d-flex align-items-center justify-content-center bg-light">
+          <div className="container">
+            <div className="row justify-content-center">
+              <div className="col-md-6 col-lg-5">
+                <div className="card border-0 shadow-lg">
+                  <div className="card-body p-5 text-center">
+                    <div className="mb-4">
+                      <i className="fas fa-exclamation-triangle fa-4x text-danger"></i>
+                    </div>
+                    <h2 className="h3 mb-3">خطا</h2>
+                    <p className="text-muted mb-4">{error}</p>
+                    <button
+                      onClick={fetchCommissions}
+                      className="btn btn-primary btn-lg px-5"
+                    >
+                      <i className="fas fa-redo me-2"></i>
+                      تلاش مجدد
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
+        <Toast {...toast} onClose={hideToast} />
+      </>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">Commission Dashboard</h1>
+    <>
+      <div className="min-vh-100 bg-light">
+        <div className="container py-5">
+          {/* Header */}
+          <div className="row mb-4">
+            <div className="col-12">
+              <h1 className="h2 mb-2 fw-bold">
+                <i className="fas fa-chart-line text-primary me-2"></i>
+                داشبورد کمیسیون‌ها
+              </h1>
+              <p className="text-muted h6">کمیسیون‌های خود را ردیابی و مدیریت کنید</p>
+            </div>
+          </div>
 
-        {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white rounded-lg shadow-sm border p-6">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                  <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-                  </svg>
+          {/* Summary Cards */}
+          <div className="row g-4 mb-5">
+            <div className="col-md-4">
+              <div className="card border-0 shadow-sm h-100">
+                <div className="card-body text-center">
+                  <div className="mb-3">
+                    <i className="fas fa-dollar-sign fa-2x text-primary"></i>
+                  </div>
+                  <h3 className="h4 fw-bold text-primary">
+                    {commissions?.totals.total.toLocaleString('fa-IR') || '0'} تومان
+                  </h3>
+                  <p className="text-muted mb-0">کل کمیسیون‌ها</p>
                 </div>
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-500">Total Commissions</p>
-                <p className="text-2xl font-semibold text-gray-900">${commissions?.totals.total.toFixed(2) || '0.00'}</p>
+            </div>
+
+            <div className="col-md-4">
+              <div className="card border-0 shadow-sm h-100">
+                <div className="card-body text-center">
+                  <div className="mb-3">
+                    <i className="fas fa-clock fa-2x text-warning"></i>
+                  </div>
+                  <h3 className="h4 fw-bold text-warning">
+                    {commissions?.totals.pending.toLocaleString('fa-IR') || '0'} تومان
+                  </h3>
+                  <p className="text-muted mb-0">در انتظار پرداخت</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="col-md-4">
+              <div className="card border-0 shadow-sm h-100">
+                <div className="card-body text-center">
+                  <div className="mb-3">
+                    <i className="fas fa-check-circle fa-2x text-success"></i>
+                  </div>
+                  <h3 className="h4 fw-bold text-success">
+                    {commissions?.totals.paid.toLocaleString('fa-IR') || '0'} تومان
+                  </h3>
+                  <p className="text-muted mb-0">پرداخت شده</p>
+                </div>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-sm border p-6">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
-                  <svg className="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-500">Pending</p>
-                <p className="text-2xl font-semibold text-gray-900">${commissions?.totals.pending.toFixed(2) || '0.00'}</p>
-              </div>
+          {/* Commissions Table */}
+          <div className="card border-0 shadow-sm">
+            <div className="card-header bg-gradient text-white" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
+              <h2 className="h5 mb-0">
+                <i className="fas fa-history me-2"></i>
+                تاریخچه کمیسیون‌ها
+              </h2>
             </div>
-          </div>
 
-          <div className="bg-white rounded-lg shadow-sm border p-6">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                  <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-500">Paid</p>
-                <p className="text-2xl font-semibold text-gray-900">${commissions?.totals.paid.toFixed(2) || '0.00'}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Commissions Table */}
-        <div className="bg-white rounded-lg shadow-sm border">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h2 className="text-lg font-medium text-gray-900">Commission History</h2>
-          </div>
-
-          {commissions && commissions.commissions.length > 0 ? (
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Referral Code
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Customer
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Purchase Amount
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Commission
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Status
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Date
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {commissions.commissions.map((commission) => (
-                    <tr key={commission.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                        {commission.referral_code}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {commission.customer_name}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        ${commission.purchase_amount.toFixed(2)}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        ${commission.amount.toFixed(2)}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                          commission.status === 'paid' 
-                            ? 'bg-green-100 text-green-800'
-                            : commission.status === 'pending'
-                            ? 'bg-yellow-100 text-yellow-800'
-                            : 'bg-red-100 text-red-800'
-                        }`}>
-                          {commission.status_display}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {new Date(commission.created_at).toLocaleDateString()}
-                      </td>
+            {commissions && commissions.commissions.length > 0 ? (
+              <div className="table-responsive">
+                <table className="table table-hover mb-0">
+                  <thead className="table-light">
+                    <tr>
+                      <th className="border-0">کد معرفی</th>
+                      <th className="border-0">مشتری</th>
+                      <th className="border-0">مبلغ خرید</th>
+                      <th className="border-0">کمیسیون</th>
+                      <th className="border-0">وضعیت</th>
+                      <th className="border-0">تاریخ</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            <div className="text-center py-12">
-              <div className="text-gray-400 mb-4">
-                <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                </svg>
+                  </thead>
+                  <tbody>
+                    {commissions.commissions.map((commission) => (
+                      <tr key={commission.id}>
+                        <td>
+                          <span className="badge bg-primary font-monospace">{commission.referral_code}</span>
+                        </td>
+                        <td className="fw-bold">{commission.customer_name}</td>
+                        <td className="fw-bold text-success">
+                          {commission.purchase_amount.toLocaleString('fa-IR')} تومان
+                        </td>
+                        <td className="fw-bold text-primary">
+                          {commission.amount.toLocaleString('fa-IR')} تومان
+                        </td>
+                        <td>
+                          <span className={`badge ${
+                            commission.status === 'paid' 
+                              ? 'bg-success'
+                              : commission.status === 'pending'
+                              ? 'bg-warning'
+                              : 'bg-danger'
+                          }`}>
+                            {commission.status === 'paid' ? 'پرداخت شده' : 
+                             commission.status === 'pending' ? 'در انتظار' : 'لغو شده'}
+                          </span>
+                        </td>
+                        <td className="text-muted">
+                          {new Date(commission.created_at).toLocaleDateString('fa-IR')}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No commissions yet</h3>
-              <p className="text-gray-600 mb-4">
-                Start sharing your referral codes to earn commissions
-              </p>
-              <button
-                onClick={() => window.location.href = '/marketers/referral-codes'}
-                className="bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors"
-              >
-                Manage Referral Codes
-              </button>
-            </div>
-          )}
-        </div>
+            ) : (
+              <div className="text-center py-5">
+                <div className="card-body">
+                  <div className="mb-4">
+                    <i className="fas fa-chart-line fa-4x text-muted"></i>
+                  </div>
+                  <h3 className="h4 mb-3">هنوز کمیسیونی ندارید</h3>
+                  <p className="text-muted mb-4">
+                    شروع به اشتراک‌گذاری کدهای معرفی خود کنید تا کمیسیون کسب کنید
+                  </p>
+                  <button
+                    onClick={() => window.location.href = '/marketers/referral-codes'}
+                    className="btn btn-primary btn-lg"
+                    style={{ 
+                      borderRadius: '50px',
+                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                      border: 'none',
+                      fontWeight: '600'
+                    }}
+                  >
+                    <i className="fas fa-cog me-2"></i>
+                    مدیریت کدهای معرفی
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
 
-        {/* Commission Information */}
-        <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-6">
-          <h3 className="text-lg font-medium text-blue-900 mb-4">How Commissions Work</h3>
-          <div className="text-sm text-blue-800 space-y-2">
-            <p>• Commissions are calculated as a percentage of the final purchase amount after any discounts</p>
-            <p>• Commissions start as "pending" and are approved after a review period</p>
-            <p>• You can track all your commissions and their status in this dashboard</p>
-            <p>• Payouts are processed monthly for approved commissions</p>
+          {/* Commission Information */}
+          <div className="card border-0 shadow-sm mt-4">
+            <div className="card-body">
+              <h3 className="h5 fw-bold mb-3">
+                <i className="fas fa-info-circle text-info me-2"></i>
+                نحوه کار کمیسیون‌ها
+              </h3>
+              <div className="row">
+                <div className="col-md-6">
+                  <ul className="list-unstyled">
+                    <li className="mb-2">
+                      <i className="fas fa-check text-success me-2"></i>
+                      کمیسیون‌ها بر اساس درصدی از مبلغ نهایی خرید پس از تخفیف محاسبه می‌شوند
+                    </li>
+                    <li className="mb-2">
+                      <i className="fas fa-check text-success me-2"></i>
+                      کمیسیون‌ها ابتدا "در انتظار" هستند و پس از دوره بررسی تایید می‌شوند
+                    </li>
+                  </ul>
+                </div>
+                <div className="col-md-6">
+                  <ul className="list-unstyled">
+                    <li className="mb-2">
+                      <i className="fas fa-check text-success me-2"></i>
+                      می‌توانید تمام کمیسیون‌ها و وضعیت آن‌ها را در این داشبورد ردیابی کنید
+                    </li>
+                    <li className="mb-2">
+                      <i className="fas fa-check text-success me-2"></i>
+                      پرداخت‌ها ماهانه و برای کمیسیون‌های تایید شده انجام می‌شود
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-    </div>
+      </div>
+      
+      <Toast {...toast} onClose={hideToast} />
+    </>
   );
 }

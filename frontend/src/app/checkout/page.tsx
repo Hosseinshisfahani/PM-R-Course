@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { cartApi, checkoutApi } from '@/lib/api';
 import { Cart, Purchase } from '@/types';
-import Layout from '@/components/Layout';
 
 export default function CheckoutPage() {
   const { user } = useAuth();
@@ -54,7 +53,7 @@ export default function CheckoutPage() {
 
   if (!user) {
     return (
-      <Layout>
+      <div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="text-center">
             <h1 className="text-2xl font-bold text-gray-900 mb-4">Please log in to checkout</h1>
@@ -66,23 +65,23 @@ export default function CheckoutPage() {
             </button>
           </div>
         </div>
-      </Layout>
+      </div>
     );
   }
 
   if (loading) {
     return (
-      <Layout>
+      <div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="text-center">Loading...</div>
         </div>
-      </Layout>
+      </div>
     );
   }
 
   if (!cart || cart.items.length === 0) {
     return (
-      <Layout>
+      <div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="text-center">
             <h1 className="text-2xl font-bold text-gray-900 mb-4">Your cart is empty</h1>
@@ -94,12 +93,12 @@ export default function CheckoutPage() {
             </button>
           </div>
         </div>
-      </Layout>
+      </div>
     );
   }
 
   return (
-    <Layout>
+    <div>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-8">Checkout</h1>
 
@@ -241,6 +240,6 @@ export default function CheckoutPage() {
           </div>
         </div>
       </div>
-    </Layout>
+    </div>
   );
 }

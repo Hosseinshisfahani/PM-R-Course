@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { coursesApi } from '@/lib/api';
+import { coursesApi, referralApi, cartApi } from '@/lib/api';
 
 interface Course {
   id: number;
@@ -71,12 +71,30 @@ export default function CourseDetailPage() {
   const [loading, setLoading] = useState(true);
   const [activeSection, setActiveSection] = useState<number | null>(null);
   const [showAllReviews, setShowAllReviews] = useState(false);
+  
+  // Referral code state
+  const [referralCode, setReferralCode] = useState('');
+  const [referralDiscount, setReferralDiscount] = useState(0);
+  const [referralData, setReferralData] = useState<any>(null);
+  const [validatingReferral, setValidatingReferral] = useState(false);
+  const [referralError, setReferralError] = useState('');
+  const [showReferralBanner, setShowReferralBanner] = useState(false);
 
   useEffect(() => {
     if (params.slug) {
       fetchCourse(params.slug as string);
     }
+    // Check for referral code in localStorage
+    checkForReferralCode();
   }, [params.slug]);
+
+  const checkForReferralCode = () => {
+    const storedCode = localStorage.getItem('referral_code');
+    if (storedCode) {
+      setReferralCode(storedCode);
+      validateReferralCode(storedCode);
+    }
+  };
 
   const fetchCourse = async (slug: string) => {
     try {
@@ -120,10 +138,68 @@ export default function CourseDetailPage() {
     return `${mins} دقیقه`;
   };
 
-  const handleAddToCart = () => {
-    if (course) {
-      // Add to cart functionality
-      console.log('Add to cart:', course.id);
+  const validateReferralCode = async (code: string) => {
+    if (!code.trim()) return;
+    
+    setValidatingReferral(true);
+    setReferralError('');
+    
+    try {
+      const response = await referralApi.validateCode(code);
+      if (response.valid) {
+        setReferralData(response);
+        setReferralDiscount(response.value || 0);
+        setReferralError('');
+        // Store in localStorage for persistence
+        localStorage.setItem('referral_code', code);
+      } else {
+        setReferralError(response.reason || 'کد معرفی نامعتبر است');
+        setReferralData(null);
+        setReferralDiscount(0);
+      }
+    } catch (error) {
+      setReferralError('خطا در بررسی کد معرفی');
+      setReferralData(null);
+      setReferralDiscount(0);
+    } finally {
+      setValidatingReferral(false);
+    }
+  };
+
+  const removeReferralCode = () => {
+    setReferralCode('');
+    setReferralData(null);
+    setReferralDiscount(0);
+    setReferralError('');
+    localStorage.removeItem('referral_code');
+  };
+
+  const handleAddToCart = async () => {
+    if (!course) return;
+    
+    try {
+      // Add course to cart
+      await cartApi.addToCart({ course_id: course.id });
+      
+      // If referral code is applied, apply it to the cart
+      if (referralCode && referralData) {
+        try {
+          await referralApi.applyCode(referralCode);
+        } catch (error) {
+          console.error('Error applying referral code to cart:', error);
+          // Don't fail the add to cart if referral code fails
+        }
+      }
+      
+      // Show success message
+      alert('دوره با موفقیت به سبد خرید اضافه شد' + (referralData ? ' و کد معرفی اعمال شد' : ''));
+      
+      // Optionally redirect to cart
+      window.location.href = '/cart';
+      
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      alert('خطا در افزودن دوره به سبد خرید');
     }
   };
 
@@ -395,6 +471,81 @@ export default function CourseDetailPage() {
 
           {/* Sidebar */}
           <div className="col-lg-4">
+            {/* Referral Code Banner */}
+            {!course.is_free && (
+              <div className="card border-0 shadow-sm mb-4" data-aos="fade-left">
+                <div className="card-body p-4">
+                  {referralData ? (
+                    // Success state - code applied
+                    <div className="alert alert-success border-0 mb-0">
+                      <div className="d-flex align-items-center">
+                        <i className="fas fa-gift fa-2x text-success me-3"></i>
+                        <div className="flex-grow-1">
+                          <h6 className="mb-1 text-success fw-bold">
+                            <i className="fas fa-check-circle me-1"></i>
+                            کد معرفی اعمال شد!
+                          </h6>
+                          <p className="mb-1">
+                            کد: <code className="bg-white text-success px-2 py-1 rounded">{referralCode}</code>
+                          </p>
+                          <p className="mb-0 text-success fw-bold">
+                            {referralDiscount}% تخفیف اعمال شد
+                          </p>
+                        </div>
+                        <button 
+                          className="btn btn-sm btn-outline-danger"
+                          onClick={removeReferralCode}
+                          title="حذف کد معرفی"
+                        >
+                          <i className="fas fa-times"></i>
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    // Input state - no code applied
+                    <div>
+                      <div className="d-flex align-items-center mb-3">
+                        <i className="fas fa-tag text-primary me-2"></i>
+                        <h6 className="mb-0 text-primary fw-bold">کد معرفی دارید؟</h6>
+                      </div>
+                      <p className="text-muted small mb-3">
+                        اگر کد معرفی از یکی از بازاریابان ما دارید، آن را وارد کنید تا تخفیف دریافت کنید
+                      </p>
+                      
+                      <div className="input-group mb-3">
+                        <input
+                          type="text"
+                          className="form-control"
+                          placeholder="کد معرفی خود را وارد کنید"
+                          value={referralCode}
+                          onChange={(e) => setReferralCode(e.target.value)}
+                          onKeyPress={(e) => e.key === 'Enter' && validateReferralCode(referralCode)}
+                        />
+                        <button 
+                          className="btn btn-primary"
+                          onClick={() => validateReferralCode(referralCode)}
+                          disabled={validatingReferral || !referralCode.trim()}
+                        >
+                          {validatingReferral ? (
+                            <span className="spinner-border spinner-border-sm" role="status"></span>
+                          ) : (
+                            <i className="fas fa-check"></i>
+                          )}
+                        </button>
+                      </div>
+                      
+                      {referralError && (
+                        <div className="alert alert-danger py-2 mb-0">
+                          <i className="fas fa-exclamation-triangle me-1"></i>
+                          {referralError}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
             {/* Purchase Card */}
             <div className="card border-0 shadow-sm sticky-top" style={{ top: '100px' }} data-aos="fade-left">
               <div className="card-body p-4">
@@ -403,9 +554,25 @@ export default function CourseDetailPage() {
                     <h3 className="text-success mb-0">رایگان</h3>
                   ) : (
                     <div>
-                      <h3 className="text-primary mb-0">
-                        {Math.round(course.effective_price || 0).toLocaleString()} تومان
-                      </h3>
+                      {referralData ? (
+                        // Show discounted price when referral code is applied
+                        <div>
+                          <div className="text-muted text-decoration-line-through mb-1">
+                            {Math.round(course.effective_price || 0).toLocaleString()} تومان
+                          </div>
+                          <h3 className="text-success mb-0">
+                            {Math.round((course.effective_price || 0) * (1 - referralDiscount / 100)).toLocaleString()} تومان
+                          </h3>
+                          <div className="badge bg-success mt-2">
+                            {referralDiscount}% تخفیف
+                          </div>
+                        </div>
+                      ) : (
+                        // Show original price
+                        <h3 className="text-primary mb-0">
+                          {Math.round(course.effective_price || 0).toLocaleString()} تومان
+                        </h3>
+                      )}
                     </div>
                   )}
                 </div>

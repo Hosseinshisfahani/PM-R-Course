@@ -370,3 +370,47 @@ class MarketerRegistrationRequest(models.Model):
         if notes:
             self.admin_notes = notes
         self.save()
+
+
+class ReferralCodeSettings(models.Model):
+    """Singleton model for default referral code settings"""
+    
+    default_discount_percentage = models.DecimalField(
+        max_digits=5, 
+        decimal_places=2, 
+        default=10.00,
+        help_text="درصد تخفیف پیش‌فرض برای کدهای معرفی جدید"
+    )
+    default_commission_percentage = models.DecimalField(
+        max_digits=5, 
+        decimal_places=2, 
+        default=10.00,
+        help_text="درصد کمیسیون پیش‌فرض برای کدهای معرفی جدید"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = "تنظیمات کدهای معرفی"
+        verbose_name_plural = "تنظیمات کدهای معرفی"
+    
+    def __str__(self):
+        return f"تنظیمات کدهای معرفی (تخفیف: {self.default_discount_percentage}%, کمیسیون: {self.default_commission_percentage}%)"
+    
+    def save(self, *args, **kwargs):
+        # Ensure only one instance exists (singleton pattern)
+        if not self.pk and ReferralCodeSettings.objects.exists():
+            raise ValueError("تنظیمات کدهای معرفی قبلاً ایجاد شده است. فقط یک نمونه مجاز است.")
+        super().save(*args, **kwargs)
+    
+    @classmethod
+    def get_settings(cls):
+        """Get the singleton settings instance, create if doesn't exist"""
+        settings, created = cls.objects.get_or_create(
+            pk=1,
+            defaults={
+                'default_discount_percentage': 10.00,
+                'default_commission_percentage': 10.00
+            }
+        )
+        return settings

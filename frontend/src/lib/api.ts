@@ -1,6 +1,62 @@
 // API client for Django backend
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
 
+// Persian error messages
+function getPersianErrorMessage(status: number, originalMessage?: string): string {
+  // Common error messages
+  const errorMessages: { [key: string]: string } = {
+    'Invalid referral code': 'کد معرفی نامعتبر است',
+    'Referral code not found': 'کد معرفی یافت نشد',
+    'Referral code is not active': 'کد معرفی غیرفعال است',
+    'Referral code has reached maximum uses': 'کد معرفی به حداکثر استفاده رسیده است',
+    'You already have a pending request': 'شما قبلاً درخواست عضویت ثبت کرده‌اید',
+    'Authentication required': 'نیاز به ورود به سیستم',
+    'Permission denied': 'دسترسی مجاز نیست',
+    'User not found': 'کاربر یافت نشد',
+    'Invalid credentials': 'اطلاعات ورود نامعتبر',
+    'Network error': 'خطا در اتصال به سرور',
+    'Server error': 'خطای سرور',
+    'Validation error': 'خطا در اعتبارسنجی',
+    'Already exists': 'قبلاً وجود دارد',
+    'Not found': 'یافت نشد',
+    'Unauthorized': 'غیرمجاز',
+    'Forbidden': 'ممنوع',
+    'Bad request': 'درخواست نامعتبر',
+    'Internal server error': 'خطای داخلی سرور',
+    'Service unavailable': 'سرویس در دسترس نیست',
+    'Timeout': 'زمان اتصال به پایان رسید'
+  };
+
+  // Check if original message has a Persian translation
+  if (originalMessage && errorMessages[originalMessage]) {
+    return errorMessages[originalMessage];
+  }
+
+  // Status code based messages
+  switch (status) {
+    case 400:
+      return 'درخواست نامعتبر است';
+    case 401:
+      return 'نیاز به ورود به سیستم';
+    case 403:
+      return 'دسترسی مجاز نیست';
+    case 404:
+      return 'صفحه یا اطلاعات مورد نظر یافت نشد';
+    case 409:
+      return 'تضاد در اطلاعات - ممکن است قبلاً وجود داشته باشد';
+    case 422:
+      return 'خطا در اعتبارسنجی اطلاعات';
+    case 500:
+      return 'خطای داخلی سرور';
+    case 502:
+      return 'خطا در ارتباط با سرور';
+    case 503:
+      return 'سرویس موقتاً در دسترس نیست';
+    default:
+      return originalMessage || 'خطای نامشخص رخ داده است';
+  }
+}
+
 export interface ApiResponse<T = any> {
   data?: T;
   error?: string;
@@ -45,7 +101,8 @@ async function apiFetch(input: RequestInfo, init: RequestInit = {}): Promise<Res
     
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      throw new ApiError(response.status, errorData.error || `HTTP ${response.status}`);
+      const persianMessage = getPersianErrorMessage(response.status, errorData.error || errorData.message);
+      throw new ApiError(response.status, persianMessage);
     }
     
     return response;
@@ -253,8 +310,6 @@ export const marketerApi = {
   
   async createCode(data: {
     code?: string;
-    discount_percentage: number;
-    commission_percentage: number;
     max_uses?: number;
   }) {
     const response = await apiFetch('/payments/marketers/codes/', {
@@ -350,6 +405,66 @@ export const adminApi = {
         action: 'reject',
         admin_notes: adminNotes,
       }),
+    });
+    return response.json();
+  },
+  
+  async getMarketers(params?: {
+    search?: string;
+  }) {
+    const searchParams = new URLSearchParams();
+    if (params?.search) searchParams.set('search', params.search);
+    
+    const query = searchParams.toString();
+    const response = await apiFetch(`/admin/marketers/${query ? `?${query}` : ''}`);
+    return response.json();
+  },
+  
+  async getReferralCodes(params?: {
+    is_active?: boolean;
+    marketer_id?: number;
+  }) {
+    const searchParams = new URLSearchParams();
+    if (params?.is_active !== undefined) searchParams.set('is_active', params.is_active.toString());
+    if (params?.marketer_id) searchParams.set('marketer_id', params.marketer_id.toString());
+    
+    const query = searchParams.toString();
+    const response = await apiFetch(`/admin/referral-codes/${query ? `?${query}` : ''}`);
+    return response.json();
+  },
+  
+  async updateReferralCode(codeId: number, data: {
+    is_active?: boolean;
+    max_uses?: number;
+    discount_percentage?: number;
+    commission_percentage?: number;
+  }) {
+    const response = await apiFetch(`/admin/referral-codes/${codeId}/`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+    return response.json();
+  },
+  
+  async deleteReferralCode(codeId: number) {
+    const response = await apiFetch(`/admin/referral-codes/${codeId}/`, {
+      method: 'DELETE',
+    });
+    return response.json();
+  },
+  
+  async getReferralCodeSettings() {
+    const response = await apiFetch('/admin/referral-code-settings/');
+    return response.json();
+  },
+  
+  async updateReferralCodeSettings(data: {
+    default_discount_percentage: number;
+    default_commission_percentage: number;
+  }) {
+    const response = await apiFetch('/admin/referral-code-settings/', {
+      method: 'PUT',
+      body: JSON.stringify(data),
     });
     return response.json();
   },

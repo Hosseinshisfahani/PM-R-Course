@@ -9,8 +9,8 @@ from datetime import datetime, timedelta
 from .permissions import IsAdminUser
 from accounts.models import User
 from accounts.serializers import UserSerializer
-from payments.models import Purchase, MarketerCommission, MarketerRegistrationRequest, ReferralCode
-from payments.serializers import PurchaseSerializer, MarketerCommissionSerializer
+from payments.models import Purchase, MarketerCommission, MarketerRegistrationRequest, ReferralCode, ReferralCodeSettings
+from payments.serializers import PurchaseSerializer, MarketerCommissionSerializer, MarketerSerializer, ReferralCodeSerializer, ReferralCodeSettingsSerializer
 from courses.models import Course, CoursePackage
 from courses.serializers import CourseListSerializer, CourseDetailSerializer, CoursePackageSerializer
 from tickets.models import SupportTicket, TicketMessage
@@ -297,6 +297,85 @@ class AdminCoursesView(APIView):
         course = get_object_or_404(Course, id=course_id)
         course.delete()
         return Response({'message': 'Course deleted successfully'})
+
+
+class AdminMarketersView(APIView):
+    """Manage active marketers for admin"""
+    permission_classes = [IsAuthenticated, IsAdminUser]
+    
+    def get(self, request):
+        """Get all active marketers with their stats"""
+        marketers = User.objects.filter(user_type='staff').order_by('-created_at')
+        
+        # Filter by search term
+        search = request.query_params.get('search')
+        if search:
+            marketers = marketers.filter(
+                Q(username__icontains=search) |
+                Q(email__icontains=search) |
+                Q(first_name__icontains=search) |
+                Q(last_name__icontains=search)
+            )
+        
+        serializer = MarketerSerializer(marketers, many=True)
+        return Response(serializer.data)
+
+
+class AdminReferralCodesView(APIView):
+    """Manage referral codes for admin"""
+    permission_classes = [IsAuthenticated, IsAdminUser]
+    
+    def get(self, request):
+        """Get all referral codes with usage stats"""
+        codes = ReferralCode.objects.select_related('marketer').order_by('-created_at')
+        
+        # Filter by status
+        is_active = request.query_params.get('is_active')
+        if is_active is not None:
+            codes = codes.filter(is_active=is_active.lower() == 'true')
+        
+        # Filter by marketer
+        marketer_id = request.query_params.get('marketer_id')
+        if marketer_id:
+            codes = codes.filter(marketer_id=marketer_id)
+        
+        serializer = ReferralCodeSerializer(codes, many=True)
+        return Response(serializer.data)
+    
+    def put(self, request, code_id):
+        """Update referral code"""
+        code = get_object_or_404(ReferralCode, id=code_id)
+        serializer = ReferralCodeSerializer(code, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def delete(self, request, code_id):
+        """Delete referral code"""
+        code = get_object_or_404(ReferralCode, id=code_id)
+        code.delete()
+        return Response({'message': 'Referral code deleted successfully'})
+
+
+class AdminReferralCodeSettingsView(APIView):
+    """Manage referral code default settings"""
+    permission_classes = [IsAuthenticated, IsAdminUser]
+    
+    def get(self, request):
+        """Get current default settings"""
+        settings = ReferralCodeSettings.get_settings()
+        serializer = ReferralCodeSettingsSerializer(settings)
+        return Response(serializer.data)
+    
+    def put(self, request):
+        """Update default settings"""
+        settings = ReferralCodeSettings.get_settings()
+        serializer = ReferralCodeSettingsSerializer(settings, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class AdminPackagesView(APIView):
