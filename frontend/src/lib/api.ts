@@ -268,6 +268,26 @@ export const marketerApi = {
     const response = await apiFetch('/payments/marketers/commissions/');
     return response.json();
   },
+  
+  async updateCode(codeId: number, data: {
+    is_active?: boolean;
+    discount_percentage?: number;
+    commission_percentage?: number;
+    max_uses?: number;
+  }) {
+    const response = await apiFetch(`/payments/marketers/codes/${codeId}/`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+    return response.json();
+  },
+  
+  async deleteCode(codeId: number) {
+    const response = await apiFetch(`/payments/marketers/codes/${codeId}/`, {
+      method: 'DELETE',
+    });
+    return response.json();
+  },
 };
 
 // Admin API

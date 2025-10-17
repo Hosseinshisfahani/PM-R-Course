@@ -17,7 +17,7 @@ class SupportTicketListView(APIView):
     
     def get(self, request):
         # Check if user is admin
-        if not request.user.is_admin_user():
+        if not request.user.is_admin_user:
             return Response(
                 {'error': 'Access denied. Admin privileges required.'}, 
                 status=status.HTTP_403_FORBIDDEN
@@ -60,7 +60,7 @@ class SupportTicketDetailView(APIView):
     
     def get(self, request, ticket_id):
         # Check if user is admin
-        if not request.user.is_admin_user():
+        if not request.user.is_admin_user:
             return Response(
                 {'error': 'Access denied. Admin privileges required.'}, 
                 status=status.HTTP_403_FORBIDDEN
@@ -72,7 +72,7 @@ class SupportTicketDetailView(APIView):
     
     def put(self, request, ticket_id):
         # Check if user is admin
-        if not request.user.is_admin_user():
+        if not request.user.is_admin_user:
             return Response(
                 {'error': 'Access denied. Admin privileges required.'}, 
                 status=status.HTTP_403_FORBIDDEN
@@ -105,7 +105,7 @@ class TicketMessageCreateView(APIView):
     
     def post(self, request, ticket_id):
         # Check if user is admin
-        if not request.user.is_admin_user():
+        if not request.user.is_admin_user:
             return Response(
                 {'error': 'Access denied. Admin privileges required.'}, 
                 status=status.HTTP_403_FORBIDDEN

@@ -6,19 +6,75 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useRole } from '@/lib/auth';
 
 export default function Navigation() {
-  const { user, logout } = useAuth();
+  const { user, logout, loading } = useAuth();
   const { canAccessMarketerFeatures, isAdmin } = useRole();
-  const [isScrolled, setIsScrolled] = useState(false);
   const [cartCount, setCartCount] = useState(0);
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
+    setIsClient(true);
+    
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
+      const navbar = document.getElementById('mainNavbar');
+      if (navbar) {
+        if (window.scrollY > 50) {
+          navbar.classList.add('scrolled');
+        } else {
+          navbar.classList.remove('scrolled');
+        }
+      }
     };
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Prevent hydration mismatch by not rendering user-dependent content until client-side
+  if (!isClient) {
+    return (
+      <nav className="navbar navbar-expand-lg navbar-light sticky-top" id="mainNavbar">
+        <div className="container">
+          <Link className="navbar-brand" href="/">
+            <i className="fas fa-graduation-cap me-2"></i>
+            آکادمی آقای استخوان
+          </Link>
+          
+          <button className="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span className="navbar-toggler-icon"></span>
+          </button>
+          
+          <div className="collapse navbar-collapse" id="navbarNav">
+            <ul className="navbar-nav ms-auto">
+              <li className="nav-item">
+                <Link className="nav-link" href="/">خانه</Link>
+              </li>
+              <li className="nav-item">
+                <Link className="nav-link" href="/courses">دوره‌ها</Link>
+              </li>
+              <li className="nav-item">
+                <Link className="nav-link" href="/about">درباره ما</Link>
+              </li>
+            </ul>
+            
+            <ul className="navbar-nav align-items-center">
+              <li className="nav-item">
+                <Link className="nav-link" href="/login">
+                  <i className="fas fa-sign-in-alt me-1"></i>
+                  ورود
+                </Link>
+              </li>
+              <li className="nav-item ms-2">
+                <Link className="btn btn-primary" href="/signup">
+                  <i className="fas fa-user-plus me-1"></i>
+                  ثبت‌نام
+                </Link>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+    );
+  }
 
   const handleLogout = async () => {
     try {
@@ -29,7 +85,7 @@ export default function Navigation() {
   };
 
   return (
-    <nav className={`navbar navbar-expand-lg navbar-light sticky-top ${isScrolled ? 'scrolled' : ''}`} id="mainNavbar">
+    <nav className="navbar navbar-expand-lg navbar-light sticky-top" id="mainNavbar">
       <div className="container">
         <Link className="navbar-brand" href="/">
           <i className="fas fa-graduation-cap me-2"></i>
@@ -49,10 +105,7 @@ export default function Navigation() {
               <Link className="nav-link" href="/courses">دوره‌ها</Link>
             </li>
             <li className="nav-item">
-              <a className="nav-link" href="#about">درباره ما</a>
-            </li>
-            <li className="nav-item">
-              <a className="nav-link" href="#contact">تماس</a>
+              <Link className="nav-link" href="/about">درباره ما</Link>
             </li>
             {user && (
               <li className="nav-item">

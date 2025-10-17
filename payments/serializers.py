@@ -88,7 +88,7 @@ class MarketerRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = MarketerRegistrationRequest
         fields = [
-            'id', 'user_name', 'full_name', 'phone_number', 'email',
+            'id', 'user', 'user_name', 'full_name', 'phone_number', 'email',
             'experience_level', 'experience_display', 'current_job',
             'interest_area', 'interest_display', 'motivation',
             'marketing_experience', 'instagram_handle', 'telegram_handle',

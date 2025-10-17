@@ -14,12 +14,12 @@ export default function Layout({ children }: LayoutProps) {
   const pathname = usePathname();
   const isAdminPage = pathname.startsWith('/admin');
 
-  // For admin pages, don't render the main site layout
-  if (isAdminPage) {
-    return <>{children}</>;
-  }
-
   useEffect(() => {
+    // Only run effects for non-admin pages
+    if (isAdminPage) {
+      return;
+    }
+
     // Navbar scroll effect
     const handleScroll = () => {
       const navbar = document.getElementById('mainNavbar');
@@ -34,7 +34,7 @@ export default function Layout({ children }: LayoutProps) {
 
     window.addEventListener('scroll', handleScroll);
 
-    // Smooth scrolling for anchor links
+    // Smooth scrolling for anchor links (skip if target is sticky navbar)
     const anchorLinks = document.querySelectorAll('a[href^="#"]');
     anchorLinks.forEach(anchor => {
       anchor.addEventListener('click', (e: Event) => {
@@ -44,6 +44,12 @@ export default function Layout({ children }: LayoutProps) {
         if (href && href.length > 1) {
           const target = document.querySelector(href);
           if (target) {
+            // Skip auto-scroll if target is the sticky navbar
+            const navbar = document.getElementById('mainNavbar');
+            if (target === navbar) {
+              return;
+            }
+            
             target.scrollIntoView({
               behavior: 'smooth',
               block: 'start'
@@ -56,7 +62,12 @@ export default function Layout({ children }: LayoutProps) {
     return () => {
       window.removeEventListener('scroll', handleScroll);
     };
-  }, []);
+  }, [isAdminPage]);
+
+  // For admin pages, don't render the main site layout
+  if (isAdminPage) {
+    return <>{children}</>;
+  }
 
   return (
     <>

@@ -1,16 +1,18 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { marketerApi } from '@/lib/api';
 
 export default function MarketerJoinPage() {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const [checkingExisting, setCheckingExisting] = useState(true);
+  const [existingRequest, setExistingRequest] = useState<any>(null);
 
   const [formData, setFormData] = useState({
     full_name: '',
@@ -24,6 +26,27 @@ export default function MarketerJoinPage() {
     telegram_handle: '',
   });
 
+  useEffect(() => {
+    if (user && !authLoading) {
+      // Check if user already has a request
+      marketerApi.getMyRequest()
+        .then((data) => {
+          // Check if the response contains an error (no request found)
+          if (data.error) {
+            setExistingRequest(null);
+          } else {
+            setExistingRequest(data);
+          }
+          setCheckingExisting(false);
+        })
+        .catch(() => {
+          // No existing request found
+          setExistingRequest(null);
+          setCheckingExisting(false);
+        });
+    }
+  }, [user, authLoading]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -33,7 +56,12 @@ export default function MarketerJoinPage() {
       await marketerApi.createRequest(formData);
       setSuccess(true);
     } catch (error: any) {
-      setError(error.message || 'خطا در ارسال درخواست. لطفا دوباره تلاش کنید.');
+      const errorMessage = error.message || 'خطا در ارسال درخواست. لطفا دوباره تلاش کنید.';
+      if (errorMessage.includes('already have a pending request') || errorMessage.includes('قبلاً درخواست')) {
+        setError('شما قبلاً درخواست عضویت ثبت کرده‌اید. لطفاً منتظر بررسی آن باشید.');
+      } else {
+        setError(errorMessage);
+      }
     } finally {
       setLoading(false);
     }
@@ -45,6 +73,70 @@ export default function MarketerJoinPage() {
       [e.target.name]: e.target.value,
     });
   };
+
+  if (checkingExisting || authLoading) {
+    return (
+      <div className="min-vh-100 d-flex align-items-center justify-content-center bg-light">
+        <div className="text-center">
+          <div className="spinner-border text-primary" role="status">
+            <span className="visually-hidden">در حال بررسی...</span>
+          </div>
+          <p className="mt-3">در حال بررسی وضعیت...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (existingRequest) {
+    return (
+      <div className="min-vh-100 d-flex align-items-center justify-content-center bg-light">
+        <div className="container">
+          <div className="row justify-content-center">
+            <div className="col-md-8 col-lg-6">
+              <div className="card border-0 shadow-lg">
+                <div className="card-body p-5 text-center">
+                  <div className="mb-4">
+                    <div className={`bg-${existingRequest.status === 'approved' ? 'success' : existingRequest.status === 'rejected' ? 'danger' : 'warning'} bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center`} 
+                         style={{ width: '100px', height: '100px' }}>
+                      <i className={`fas fa-${existingRequest.status === 'approved' ? 'check' : existingRequest.status === 'rejected' ? 'times' : 'clock'} fa-3x text-${existingRequest.status === 'approved' ? 'success' : existingRequest.status === 'rejected' ? 'danger' : 'warning'}`}></i>
+                    </div>
+                  </div>
+                  <h2 className="h3 mb-3">
+                    {existingRequest.status === 'approved' && 'درخواست شما تایید شد!'}
+                    {existingRequest.status === 'rejected' && 'درخواست شما رد شد'}
+                    {existingRequest.status === 'pending' && 'درخواست شما در حال بررسی است'}
+                  </h2>
+                  <p className="text-muted mb-4">
+                    {existingRequest.status === 'approved' && 'تبریک! شما اکنون عضو تیم بازاریابان ما هستید.'}
+                    {existingRequest.status === 'rejected' && (existingRequest.admin_notes || 'متأسفانه درخواست شما مورد تایید قرار نگرفت.')}
+                    {existingRequest.status === 'pending' && 'درخواست شما در اسرع وقت بررسی خواهد شد و نتیجه به شما اطلاع داده خواهد شد.'}
+                  </p>
+                  <div className="d-grid gap-3">
+                    {existingRequest.status === 'approved' && (
+                      <button
+                        onClick={() => router.push('/marketers/referral-codes')}
+                        className="btn btn-success btn-lg"
+                      >
+                        <i className="fas fa-gift me-2"></i>
+                        مشاهده کدهای معرفی
+                      </button>
+                    )}
+                    <button
+                      onClick={() => router.push('/')}
+                      className="btn btn-outline-secondary"
+                    >
+                      <i className="fas fa-home me-2"></i>
+                      بازگشت به صفحه اصلی
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (!user) {
     return (

@@ -79,7 +79,7 @@ class CourseListSerializer(serializers.ModelSerializer):
             'instructor_name', 'difficulty', 'effective_price', 'is_free',
             'duration_hours', 'total_sections', 'total_videos',
             'average_rating', 'review_count', 'thumbnail', 'is_featured',
-            'created_at'
+            'is_published', 'created_at'
         ]
     
     def get_effective_price(self, obj):

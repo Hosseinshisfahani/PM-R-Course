@@ -279,19 +279,19 @@ class MarketerReferralCodesView(LoginRequiredMixin, ListView):
     context_object_name = 'referral_codes'
     
     def get_queryset(self):
-        if not self.request.user.is_staff_member():
+        if not self.request.user.is_staff_member:
             return ReferralCode.objects.none()
         return ReferralCode.objects.filter(marketer=self.request.user).order_by('-created_at')
 
 class CreateReferralCodeView(LoginRequiredMixin, View):
     def get(self, request):
-        if not request.user.is_staff_member():
+        if not request.user.is_staff_member:
             messages.error(request, 'شما مجاز به ایجاد کد معرفی نیستید.')
             return redirect('courses:home')
         return render(request, 'payments/create_referral_code.html')
     
     def post(self, request):
-        if not request.user.is_staff_member():
+        if not request.user.is_staff_member:
             messages.error(request, 'شما مجاز به ایجاد کد معرفی نیستید.')
             return redirect('courses:home')
         
@@ -319,13 +319,13 @@ class MarketerCommissionsView(LoginRequiredMixin, ListView):
     paginate_by = 10
     
     def get_queryset(self):
-        if not self.request.user.is_staff_member():
+        if not self.request.user.is_staff_member:
             return MarketerCommission.objects.none()
         return MarketerCommission.objects.filter(marketer=self.request.user).order_by('-created_at')
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        if self.request.user.is_staff_member():
+        if self.request.user.is_staff_member:
             from django.db import models
             total_commission = MarketerCommission.objects.filter(
                 marketer=self.request.user,
@@ -344,7 +344,7 @@ class MarketerCommissionsView(LoginRequiredMixin, ListView):
 class JoinMarketersView(LoginRequiredMixin, View):
     def get(self, request):
         # Check if user is already a staff member
-        if request.user.is_staff_member():
+        if request.user.is_staff_member:
             messages.info(request, 'شما قبلاً عضو تیم فروشندگان هستید.')
             return redirect('payments:marketer_referral_codes')
         
@@ -365,7 +365,7 @@ class JoinMarketersView(LoginRequiredMixin, View):
     
     def post(self, request):
         # Check if user is already a staff member
-        if request.user.is_staff_member():
+        if request.user.is_staff_member:
             messages.info(request, 'شما قبلاً عضو تیم فروشندگان هستید.')
             return redirect('payments:marketer_referral_codes')
         

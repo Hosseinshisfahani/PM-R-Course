@@ -26,11 +26,14 @@ class User(AbstractUser):
     def __str__(self):
         return f"{self.username} ({self.get_user_type_display()})"
     
+    @property
     def is_staff_member(self):
         return self.user_type == 'staff'
     
+    @property
     def is_admin_user(self):
         return self.user_type == 'admin'
     
+    @property
     def is_customer(self):
         return self.user_type == 'customer'

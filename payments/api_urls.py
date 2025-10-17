@@ -19,5 +19,9 @@ urlpatterns = [
     path('marketers/requests/', api_views.MarketerRequestView.as_view(), name='api_marketer_request'),
     path('marketers/requests/me/', api_views.MyMarketerRequestView.as_view(), name='api_my_marketer_request'),
     path('marketers/codes/', api_views.MarketerCodesView.as_view(), name='api_marketer_codes'),
+    path('marketers/codes/<int:code_id>/', api_views.MarketerCodeDetailView.as_view(), name='api_marketer_code_detail'),
     path('marketers/commissions/', api_views.MarketerCommissionsView.as_view(), name='api_marketer_commissions'),
+    
+    # Purchase endpoints
+    path('purchases/', api_views.UserPurchasesView.as_view(), name='api_user_purchases'),
 ]

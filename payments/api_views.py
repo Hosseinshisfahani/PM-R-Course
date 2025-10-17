@@ -257,7 +257,7 @@ class MyMarketerRequestView(APIView):
         except MarketerRegistrationRequest.DoesNotExist:
             return Response(
                 {'error': 'No marketer request found'}, 
-                status=status.HTTP_404_NOT_FOUND
+                status=status.HTTP_200_OK
             )
 
 
@@ -266,7 +266,7 @@ class MarketerCodesView(APIView):
     permission_classes = [IsAuthenticated]
     
     def get(self, request):
-        if not request.user.is_staff_member():
+        if not request.user.is_staff_member:
             return Response(
                 {'error': 'Access denied. Marketer privileges required.'}, 
                 status=status.HTTP_403_FORBIDDEN
@@ -277,7 +277,7 @@ class MarketerCodesView(APIView):
         return Response(serializer.data)
     
     def post(self, request):
-        if not request.user.is_staff_member():
+        if not request.user.is_staff_member:
             return Response(
                 {'error': 'Access denied. Marketer privileges required.'}, 
                 status=status.HTTP_403_FORBIDDEN
@@ -293,12 +293,60 @@ class MarketerCodesView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+class MarketerCodeDetailView(APIView):
+    """Update and delete individual referral codes for marketers"""
+    permission_classes = [IsAuthenticated]
+    
+    def get_object(self, code_id, user):
+        try:
+            return ReferralCode.objects.get(id=code_id, marketer=user)
+        except ReferralCode.DoesNotExist:
+            return None
+    
+    def put(self, request, code_id):
+        if not request.user.is_staff_member:
+            return Response(
+                {'error': 'Access denied. Marketer privileges required.'}, 
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        referral_code = self.get_object(code_id, request.user)
+        if not referral_code:
+            return Response(
+                {'error': 'Referral code not found.'}, 
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        serializer = ReferralCodeSerializer(referral_code, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def delete(self, request, code_id):
+        if not request.user.is_staff_member:
+            return Response(
+                {'error': 'Access denied. Marketer privileges required.'}, 
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        referral_code = self.get_object(code_id, request.user)
+        if not referral_code:
+            return Response(
+                {'error': 'Referral code not found.'}, 
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        referral_code.delete()
+        return Response({'message': 'Referral code deleted successfully.'}, status=status.HTTP_204_NO_CONTENT)
+
+
 class MarketerCommissionsView(APIView):
     """Get marketer commissions"""
     permission_classes = [IsAuthenticated]
     
     def get(self, request):
-        if not request.user.is_staff_member():
+        if not request.user.is_staff_member:
             return Response(
                 {'error': 'Access denied. Marketer privileges required.'}, 
                 status=status.HTTP_403_FORBIDDEN
@@ -399,3 +447,16 @@ class CheckoutView(APIView):
                 {'error': f'Checkout failed: {str(e)}'}, 
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+
+class UserPurchasesView(APIView):
+    """Get user's purchase history"""
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        purchases = Purchase.objects.filter(user=request.user).select_related(
+            'course', 'section', 'referral_code'
+        ).order_by('-created_at')
+        
+        serializer = PurchaseSerializer(purchases, many=True)
+        return Response(serializer.data)

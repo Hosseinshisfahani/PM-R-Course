@@ -132,8 +132,8 @@ export default function AdminUsers() {
     setSnackbar({ open: true, message: 'فایل CSV آماده دانلود است', severity: 'success' });
   };
 
-  const getUserTypeChip = (userType: string) => {
-    if (!userType) {
+  const getUserTypeChip = (userType: string | undefined | null) => {
+    if (!userType || userType === 'undefined' || userType === 'null') {
       return <Chip color="default" label="نامشخص" size="small" />;
     }
     const chipProps = {
@@ -161,11 +161,16 @@ export default function AdminUsers() {
       field: 'avatar',
       headerName: 'آواتار',
       width: 80,
-      renderCell: (params: any) => (
-        <Avatar sx={{ width: 32, height: 32 }}>
-          {params?.row?.first_name?.[0] || params?.row?.username?.[0] || 'U'}
-        </Avatar>
-      ),
+      renderCell: (params: any) => {
+        const firstName = params?.row?.first_name;
+        const username = params?.row?.username;
+        const initial = (firstName && firstName[0]) || (username && username[0]) || 'U';
+        return (
+          <Avatar sx={{ width: 32, height: 32 }}>
+            {initial}
+          </Avatar>
+        );
+      },
     },
     {
       field: 'username',
@@ -180,7 +185,8 @@ export default function AdminUsers() {
         if (!params?.row) return '';
         const firstName = params.row.first_name || '';
         const lastName = params.row.last_name || '';
-        return `${firstName} ${lastName}`.trim();
+        const fullName = `${firstName} ${lastName}`.trim();
+        return fullName || 'نامشخص';
       },
     },
     {
@@ -192,7 +198,7 @@ export default function AdminUsers() {
       field: 'user_type',
       headerName: 'نوع کاربر',
       width: 120,
-      renderCell: (params: any) => getUserTypeChip(params?.value || ''),
+      renderCell: (params: any) => getUserTypeChip(params?.value),
     },
     {
       field: 'is_active',

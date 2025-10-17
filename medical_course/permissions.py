@@ -10,5 +10,5 @@ class IsAdminUser(BasePermission):
         return (
             request.user and 
             request.user.is_authenticated and 
-            request.user.is_admin_user()
+            request.user.is_admin_user
         )

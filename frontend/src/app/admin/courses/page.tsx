@@ -38,14 +38,17 @@ export default function AdminCourses() {
 
   const fetchCourses = async () => {
     try {
+      setLoading(true);
       const params: { search?: string; is_published?: boolean } = {};
       if (searchTerm) params.search = searchTerm;
       if (publishedFilter !== '') params.is_published = publishedFilter === 'true';
 
       const data = await adminApi.getCourses(params);
-      setCourses(data);
+      // Ensure data is always an array
+      setCourses(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Error fetching courses:', error);
+      setCourses([]); // Set empty array on error
     } finally {
       setLoading(false);
     }
@@ -89,7 +92,10 @@ export default function AdminCourses() {
     }
   };
 
-  const getPublishedBadge = (isPublished: boolean) => {
+  const getPublishedBadge = (isPublished: boolean | undefined) => {
+    if (isPublished === undefined || isPublished === null) {
+      return <span className="badge bg-secondary">نامشخص</span>;
+    }
     return isPublished ? (
       <span className="badge bg-success">منتشر شده</span>
     ) : (
@@ -97,7 +103,10 @@ export default function AdminCourses() {
     );
   };
 
-  const getFeaturedBadge = (isFeatured: boolean) => {
+  const getFeaturedBadge = (isFeatured: boolean | undefined) => {
+    if (isFeatured === undefined || isFeatured === null) {
+      return null;
+    }
     return isFeatured ? (
       <span className="badge bg-primary">ویژه</span>
     ) : null;
@@ -219,9 +228,9 @@ export default function AdminCourses() {
                           {course.instructor_name}
                         </div>
                       </td>
-                      <td>{course.effective_price.toLocaleString()} تومان</td>
+                      <td>{course.effective_price?.toLocaleString() || '0'} تومان</td>
                       <td>{getPublishedBadge(course.is_published)}</td>
-                      <td>{new Date(course.created_at).toLocaleDateString('fa-IR')}</td>
+                      <td>{course.created_at ? new Date(course.created_at).toLocaleDateString('fa-IR') : 'نامشخص'}</td>
                       <td>
                         <div className="btn-group" role="group">
                           <Link
@@ -301,7 +310,7 @@ export default function AdminCourses() {
                       <select
                         name="is_published"
                         className="form-select"
-                        defaultValue={selectedCourse.is_published.toString()}
+                        defaultValue={selectedCourse.is_published?.toString() || 'false'}
                       >
                         <option value="false">پیش‌نویس</option>
                         <option value="true">منتشر شده</option>
@@ -312,7 +321,7 @@ export default function AdminCourses() {
                       <select
                         name="is_featured"
                         className="form-select"
-                        defaultValue={selectedCourse.is_featured.toString()}
+                        defaultValue={selectedCourse.is_featured?.toString() || 'false'}
                       >
                         <option value="false">خیر</option>
                         <option value="true">بله</option>
